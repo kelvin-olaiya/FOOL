@@ -9,7 +9,7 @@ import svm.*;
 public class Test {
     public static void main(String[] args) throws Exception {
    			
-    	String fileName = "prova.fool";
+    	String fileName = "test.fool";
     	CharStream chars = CharStreams.fromFileName(fileName);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);

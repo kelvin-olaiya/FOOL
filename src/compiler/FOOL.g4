@@ -75,8 +75,8 @@ DOT	    : '.' ;
 OR	    : '||';  // TODO
 AND	    : '&&';  // TODO
 NOT	    : '!' ;  // TODO
-GE	    : '>=' ; // TODO
-LE	    : '<=' ; // TODO
+GE	    : '>=' ;
+LE	    : '<=' ;
 EQ	    : '==' ;	
 ASS	    : '=' ;
 TRUE	: 'true' ;
