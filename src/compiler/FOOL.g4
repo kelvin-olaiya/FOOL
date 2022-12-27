@@ -63,7 +63,7 @@ type    : INT #intType
 PLUS  	: '+' ;
 MINUS   : '-' ;
 TIMES   : '*' ;
-DIV 	: '/' ;  // TODO
+DIV 	: '/' ;
 LPAR	: '(' ;
 RPAR	: ')' ;
 CLPAR	: '{' ;
