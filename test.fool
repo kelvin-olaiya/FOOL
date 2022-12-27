@@ -3,8 +3,3 @@ let
     var b: int = 9;
 in
     print(a/b);
-
-
-
-
-

@@ -61,9 +61,9 @@ type    : INT #intType
  *------------------------------------------------------------------*/
 
 PLUS  	: '+' ;
-MINUS   : '-' ;
+MINUS   : '-' ;  // TODO
 TIMES   : '*' ;
-DIV 	: '/' ;
+DIV 	: '/' ;  // TODO
 LPAR	: '(' ;
 RPAR	: ')' ;
 CLPAR	: '{' ;
