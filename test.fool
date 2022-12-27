@@ -1,8 +1,8 @@
 let
-    var a: int = 2;
-    var b: int = 3;
+    var a: int = 3;
+    var b: int = 2;
 in
-    print(a>=b);
+    print(a-b);
 
 
 
