@@ -61,9 +61,9 @@ type    : INT #intType
  *------------------------------------------------------------------*/
 
 PLUS  	: '+' ;
-MINUS   : '-' ;  // TODO
+MINUS   : '-' ;
 TIMES   : '*' ;
-DIV 	: '/' ;  // TODO
+DIV 	: '/' ;
 LPAR	: '(' ;
 RPAR	: ')' ;
 CLPAR	: '{' ;
@@ -72,8 +72,8 @@ SEMIC 	: ';' ;
 COLON   : ':' ; 
 COMMA	: ',' ;
 DOT	    : '.' ;
-OR	    : '||';  // TODO
-AND	    : '&&';  // TODO
+OR	    : '||';
+AND	    : '&&';
 NOT	    : '!' ;  // TODO
 GE	    : '>=' ;
 LE	    : '<=' ;
