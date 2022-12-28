@@ -1,5 +1,4 @@
 let
-    var a: int = 3;
-    var b: int = 9;
+    var a: bool = true;
 in
-    print(a/b);
+    print(!a);

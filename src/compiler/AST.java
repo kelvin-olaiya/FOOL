@@ -133,6 +133,19 @@ public class AST {
     }
 
 
+    public static class NotNode extends Node {
+        final Node right;
+
+        NotNode(Node r) {
+            right = r;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return visitor.visitNode(this);
+        }
+    }
+
 
     public static class GreaterEqualNode extends Node {
         final Node left;
@@ -166,7 +179,6 @@ public class AST {
     }
 
 
-
     public static class TimesNode extends Node {
         final Node left;
         final Node right;
@@ -181,7 +193,6 @@ public class AST {
             return visitor.visitNode(this);
         }
     }
-
 
 
     public static class DivNode extends Node {
