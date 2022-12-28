@@ -1,6 +1,8 @@
 package compiler;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
@@ -8,6 +10,7 @@ import compiler.lib.*;
 public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	
 	private List<Map<String, STentry>> symTable = new ArrayList<>();
+	Map<String, Map<String,STentry>> classTable = new HashMap<>();
 	private int nestingLevel=0; // current nesting level
 	private int decOffset=-2; // counter for offset of local declarations at current nesting level 
 	int stErrors=0;
@@ -85,6 +88,32 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			System.out.println("Var id " + n.id + " at line "+ n.getLine() +" already declared");
 			stErrors++;
 		}
+		return null;
+	}
+
+	public Void visitNode(ClassNode n) {
+		if (print) printNode(n);
+		Map<String, STentry> hm = symTable.get(0);
+		var classType = new ClassTypeNode(new ArrayList<>(), new ArrayList<>());
+		STentry entry = new STentry(0, classType, decOffset--);
+		if (hm.put(n.id, entry) != null) {
+			System.out.println("Class id " + n.id + " at line "+ n.getLine() +" already declared");
+			stErrors++;
+		}
+		Map<String, STentry> newClassTable = new HashMap<>();
+		classTable.put(n.id, newClassTable);
+		nestingLevel++;
+		symTable.add(newClassTable);
+		int previousNLDecOffset = decOffset;
+		decOffset = -2;
+		for (var field : n.fields) {
+			classType.allFields.add(field.getType());
+		}
+		for (var method : n.methods) {
+			visit(method);
+		}
+		symTable.remove(--nestingLevel);
+		decOffset = previousNLDecOffset;
 		return null;
 	}
 

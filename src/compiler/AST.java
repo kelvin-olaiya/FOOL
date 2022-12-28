@@ -1,6 +1,7 @@
 package compiler;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import compiler.lib.*;
 
@@ -89,10 +90,12 @@ public class AST {
 
     public static class ClassNode extends DecNode {
 
+        final String id;
         final List<FieldNode> fields;
         final List<MethodNode> methods;
 
-        public ClassNode(List<FieldNode> fields, List<MethodNode> methods) {
+        public ClassNode(String id, List<FieldNode> fields, List<MethodNode> methods) {
+            this.id = id;
             this.fields = Collections.unmodifiableList(fields);
             this.methods = Collections.unmodifiableList(methods);
         }
@@ -132,6 +135,7 @@ public class AST {
             this.parlist = parametersList;
             this.declist = declarationsList;
             this.exp = exp;
+            this.type = new ArrowTypeNode(this.parlist.stream().map(ParNode::getType).collect(Collectors.toList()), this.retType);
         }
 
         @Override
@@ -409,6 +413,21 @@ public class AST {
         @Override
         public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
             return visitor.visitNode(this);
+        }
+    }
+
+    public static class ClassTypeNode extends TypeNode {
+
+        final List<TypeNode> allFields;
+        final List<ArrowTypeNode> allMethods;
+
+        ClassTypeNode(List<TypeNode> allFields, List<ArrowTypeNode> allMethods) {
+            this.allFields = allFields;
+            this.allMethods = allMethods;
+        }
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
         }
     }
 

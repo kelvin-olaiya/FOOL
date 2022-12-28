@@ -51,11 +51,10 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     @Override
     public Node visitLetInProg(LetInProgContext c) {
         if (print) printVarAndProdName(c);
-        List<ClassNode> classList = new ArrayList<>();
-        for (var classDec : c.cldec()) {
-            classList.add((ClassNode) visit(classDec));
-        }
         List<DecNode> declist = new ArrayList<>();
+        for (var classDec : c.cldec()) {
+            declist.add((DecNode) visit(classDec));
+        }
         for (DecContext dec : c.dec()) declist.add((DecNode) visit(dec));
         return new ProgLetInNode(declist, visit(c.exp()));
     }
@@ -69,6 +68,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     @Override
     public Node visitClassDec(ClassDecContext c) {
         if (print) printVarAndProdName(c);
+        String classID = c.ID(0).getText();
         List<FieldNode> fields = new ArrayList<>();
         IntStream.range(1, c.ID().size()).forEach(i -> {
             fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i))));
@@ -77,7 +77,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         for (var method : c.methdec()) {
             methods.add((MethodNode) visit(method));
         }
-        return new ClassNode(fields, methods);
+        return new ClassNode(classID, fields, methods);
     }
 
     @Override
