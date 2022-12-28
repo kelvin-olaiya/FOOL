@@ -118,7 +118,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		TypeNode l = visit(n.left);
 		TypeNode r = visit(n.right);
 		if ( !(isSubtype(l, r) || isSubtype(r, l)) )
-			throw new TypeException("Incompatible types in greater or",n.getLine());
+			throw new TypeException("Incompatible types in OR ",n.getLine());
 		return new BoolTypeNode();
 	}
 
