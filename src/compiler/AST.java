@@ -136,7 +136,7 @@ public class AST {
     public static class NotNode extends Node {
         final Node right;
 
-        NotNode(Node l, Node r) {
+        NotNode(Node r) {
             right = r;
         }
 
