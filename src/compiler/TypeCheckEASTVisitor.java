@@ -117,7 +117,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) printNode(n);
 		TypeNode r = visit(n.right);
 		if (!(isSubtype(r, new IntTypeNode())))
-			throw new TypeException("Incompatible types in not",n.getLine());
+			throw new TypeException("Incompatible type in not", n.getLine());
 		return new BoolTypeNode();
 	}
 
