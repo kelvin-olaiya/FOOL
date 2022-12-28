@@ -1,4 +1,5 @@
 let
     var a: bool = true;
+    var b: bool = true;
 in
     print(!a);
