@@ -330,6 +330,17 @@ public class FOOLParser extends Parser {
 	}
 
 	public static class CldecContext extends ParserRuleContext {
+		public CldecContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_cldec; }
+	 
+		public CldecContext() { }
+		public void copyFrom(CldecContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class ClassDecContext extends CldecContext {
 		public TerminalNode CLASS() { return getToken(FOOLParser.CLASS, 0); }
 		public List<TerminalNode> ID() { return getTokens(FOOLParser.ID); }
 		public TerminalNode ID(int i) {
@@ -360,21 +371,18 @@ public class FOOLParser extends Parser {
 		public TerminalNode COMMA(int i) {
 			return getToken(FOOLParser.COMMA, i);
 		}
-		public CldecContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_cldec; }
+		public ClassDecContext(CldecContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).enterCldec(this);
+			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).enterClassDec(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).exitCldec(this);
+			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).exitClassDec(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof FOOLVisitor ) return ((FOOLVisitor<? extends T>)visitor).visitCldec(this);
+			if ( visitor instanceof FOOLVisitor ) return ((FOOLVisitor<? extends T>)visitor).visitClassDec(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -384,6 +392,7 @@ public class FOOLParser extends Parser {
 		enterRule(_localctx, 4, RULE_cldec);
 		int _la;
 		try {
+			_localctx = new ClassDecContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(45);
@@ -472,6 +481,17 @@ public class FOOLParser extends Parser {
 	}
 
 	public static class MethdecContext extends ParserRuleContext {
+		public MethdecContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_methdec; }
+	 
+		public MethdecContext() { }
+		public void copyFrom(MethdecContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class MethodDecContext extends MethdecContext {
 		public TerminalNode FUN() { return getToken(FOOLParser.FUN, 0); }
 		public List<TerminalNode> ID() { return getTokens(FOOLParser.ID); }
 		public TerminalNode ID(int i) {
@@ -505,21 +525,18 @@ public class FOOLParser extends Parser {
 		public DecContext dec(int i) {
 			return getRuleContext(DecContext.class,i);
 		}
-		public MethdecContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_methdec; }
+		public MethodDecContext(MethdecContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).enterMethdec(this);
+			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).enterMethodDec(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).exitMethdec(this);
+			if ( listener instanceof FOOLListener ) ((FOOLListener)listener).exitMethodDec(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof FOOLVisitor ) return ((FOOLVisitor<? extends T>)visitor).visitMethdec(this);
+			if ( visitor instanceof FOOLVisitor ) return ((FOOLVisitor<? extends T>)visitor).visitMethodDec(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -529,6 +546,7 @@ public class FOOLParser extends Parser {
 		enterRule(_localctx, 6, RULE_methdec);
 		int _la;
 		try {
+			_localctx = new MethodDecContext(_localctx);
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(76);

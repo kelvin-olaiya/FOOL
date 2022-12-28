@@ -31,17 +31,19 @@ public interface FOOLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNoDecProg(FOOLParser.NoDecProgContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FOOLParser#cldec}.
+	 * Visit a parse tree produced by the {@code classDec}
+	 * labeled alternative in {@link FOOLParser#cldec}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCldec(FOOLParser.CldecContext ctx);
+	T visitClassDec(FOOLParser.ClassDecContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link FOOLParser#methdec}.
+	 * Visit a parse tree produced by the {@code methodDec}
+	 * labeled alternative in {@link FOOLParser#methdec}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMethdec(FOOLParser.MethdecContext ctx);
+	T visitMethodDec(FOOLParser.MethodDecContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code vardec}
 	 * labeled alternative in {@link FOOLParser#dec}.
