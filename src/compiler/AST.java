@@ -87,6 +87,59 @@ public class AST {
         }
     }
 
+    public static class ClassNode extends DecNode {
+
+        final List<FieldNode> fields;
+        final List<MethodNode> methods;
+
+        public ClassNode(List<FieldNode> fields, List<MethodNode> methods) {
+            this.fields = Collections.unmodifiableList(fields);
+            this.methods = Collections.unmodifiableList(methods);
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
+        }
+    }
+
+    public static class FieldNode extends DecNode {
+
+        String id;
+
+        FieldNode(String id, TypeNode type) {
+            this.id = id;
+            this.type = type;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
+        }
+    }
+
+    public static class MethodNode extends DecNode {
+
+        final String id;
+        final TypeNode retType;
+        final List<ParNode> parlist;
+        final List<DecNode> declist;
+        final Node exp;
+
+        MethodNode(String id, TypeNode returnType, List<ParNode> parametersList, List<DecNode> declarationsList, Node exp) {
+            this.id = id;
+            this.retType = returnType;
+            this.parlist = parametersList;
+            this.declist = declarationsList;
+            this.exp = exp;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
+        }
+    }
+
     public static class PrintNode extends Node {
         final Node exp;
 

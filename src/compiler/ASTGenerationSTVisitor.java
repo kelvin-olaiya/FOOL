@@ -1,6 +1,7 @@
 package compiler;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -50,6 +51,10 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     @Override
     public Node visitLetInProg(LetInProgContext c) {
         if (print) printVarAndProdName(c);
+        List<ClassNode> classList = new ArrayList<>();
+        for (var classDec : c.cldec()) {
+            classList.add((ClassNode) visit(classDec));
+        }
         List<DecNode> declist = new ArrayList<>();
         for (DecContext dec : c.dec()) declist.add((DecNode) visit(dec));
         return new ProgLetInNode(declist, visit(c.exp()));
@@ -59,6 +64,36 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     public Node visitNoDecProg(NoDecProgContext c) {
         if (print) printVarAndProdName(c);
         return new ProgNode(visit(c.exp()));
+    }
+
+    @Override
+    public Node visitClassDec(ClassDecContext c) {
+        if (print) printVarAndProdName(c);
+        List<FieldNode> fields = new ArrayList<>();
+        IntStream.range(1, c.ID().size()).forEach(i -> {
+            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i))));
+        });
+        List<MethodNode> methods = new ArrayList<>();
+        for (var method : c.methdec()) {
+            methods.add((MethodNode) visit(method));
+        }
+        return new ClassNode(fields, methods);
+    }
+
+    @Override
+    public Node visitMethodDec(MethodDecContext c) {
+        if (print) printVarAndProdName(c);
+        String methodId = c.ID(0).getText();
+        TypeNode returnType = (TypeNode) visit(c.type(0));
+        List<ParNode> parameters = new ArrayList<>();
+        IntStream.range(1, c.ID().size()).forEach(i -> {
+            parameters.add(new ParNode(c.ID(i).getText(), (TypeNode) visit(c.type(i))));
+        });
+        List<DecNode> declarations = new ArrayList<>();
+        for(var declaration : c.dec()) {
+            declarations.add((DecNode) visit(declaration));
+        }
+        return new MethodNode(methodId, returnType, parameters, declarations, visit(c.exp()));
     }
 
     @Override
