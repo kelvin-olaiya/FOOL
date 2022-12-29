@@ -1,5 +1,12 @@
 let
-    var a: bool = true;
-    var b: bool = true;
+    class A (a:bool, b:bool){
+
+        fun getBool:bool (c:bool)
+            let
+            var r:bool = a && b && c;
+            in r;
+    }
+
+    var bl:A = new A(true,true);
 in
-    print(!((!a) || b));
+    print(bl.getBool(true));

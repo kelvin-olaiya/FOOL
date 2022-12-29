@@ -128,6 +128,7 @@ public class AST {
         final List<ParNode> parlist;
         final List<DecNode> declist;
         final Node exp;
+        int offset;
 
         MethodNode(String id, TypeNode returnType, List<ParNode> parametersList, List<DecNode> declarationsList, Node exp) {
             this.id = id;
@@ -344,12 +345,45 @@ public class AST {
         }
     }
 
+    public static class ClassCallNode extends Node{
+        String objectId;
+        String methodId;
+
+        int nl;
+        STentry entry;
+        STentry methodEntry;
+        final List<Node> arglist;
+
+        public ClassCallNode(String objectId, String methodId, List<Node> arglist) {
+            this.objectId = objectId;
+            this.methodId = methodId;
+            this.arglist = arglist;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
+        }
+    }
+
     public static class IdNode extends Node {
         final String id;
         STentry entry;
         int nl;
 
         IdNode(String i) {
+            id = i;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return visitor.visitNode(this);
+        }
+    }
+
+    public static class RefTypeNode extends TypeNode {
+        final String id;
+        RefTypeNode(String i) {
             id = i;
         }
 
@@ -400,6 +434,20 @@ public class AST {
         }
     }
 
+    public static class MethodTypeNode extends TypeNode{
+
+        final ArrowTypeNode fun;
+
+        public MethodTypeNode( ArrowTypeNode fun) {
+            this.fun = fun;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return null;
+        }
+    }
+
     public static class BoolTypeNode extends TypeNode {
 
         @Override
@@ -430,5 +478,6 @@ public class AST {
             return null;
         }
     }
+
 
 }
