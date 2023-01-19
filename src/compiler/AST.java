@@ -350,7 +350,7 @@ public class AST {
         final String id;
         final List<Node> argumentsList;
         STentry symbolTableEntry;
-        int nl;
+        int nestingLevel;
 
         CallNode(String id, List<Node> arguments) {
             this.id = id;
