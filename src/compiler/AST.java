@@ -12,7 +12,7 @@ public class AST {
         final Node expression;
 
         ProgLetInNode(List<DecNode> declarations, Node expression) {
-            declarationList = Collections.unmodifiableList(declarations);
+            this.declarationList = Collections.unmodifiableList(declarations);
             this.expression = expression;
         }
 
@@ -89,7 +89,6 @@ public class AST {
     }
 
     public static class ClassNode extends DecNode {
-
         final String id;
         final List<FieldNode> fields;
         final List<MethodNode> methods;
@@ -107,7 +106,6 @@ public class AST {
     }
 
     public static class FieldNode extends DecNode {
-
         String id;
 
         FieldNode(String id, TypeNode type) {
@@ -122,7 +120,6 @@ public class AST {
     }
 
     public static class MethodNode extends DecNode {
-
         final String id;
         final TypeNode returnType;
         final List<ParNode> parametersList;
@@ -435,7 +432,6 @@ public class AST {
     }
 
     public static class MethodTypeNode extends TypeNode{
-
         final ArrowTypeNode functionalType;
 
         public MethodTypeNode( ArrowTypeNode functionalType) {
@@ -457,7 +453,6 @@ public class AST {
     }
 
     public static class IntTypeNode extends TypeNode {
-
         @Override
         public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
             return visitor.visitNode(this);
@@ -465,7 +460,6 @@ public class AST {
     }
 
     public static class ClassTypeNode extends TypeNode {
-
         final List<TypeNode> allFields;
         final List<ArrowTypeNode> allMethods;
 
