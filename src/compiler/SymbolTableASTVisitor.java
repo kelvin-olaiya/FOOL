@@ -195,12 +195,15 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	}
 
 	@Override
-	public Void visitNode(MethodNode node){
+	public Void visitNode(MethodNode node) {
 		if (print) printNode(node);
 		Map<String, STentry> currentScopeTable = symbolTable.get(nestingLevel);
 		List<TypeNode> parametersTypes = new ArrayList<>();
-		for (ParNode parameter : node.parametersList) parametersTypes.add(parameter.getType());
-		STentry entry = new STentry(nestingLevel, new MethodTypeNode(new ArrowTypeNode(parametersTypes,node.returnType)), declarationOffset++);
+		for (ParNode parameter : node.parametersList) {
+			parametersTypes.add(parameter.getType());
+		}
+		final TypeNode methodType = new MethodTypeNode(new ArrowTypeNode(parametersTypes,node.returnType));
+		STentry entry = new STentry(nestingLevel, methodType, declarationOffset++);
 		node.offset = entry.offset;
 		/*
 		 * Insert ID into the symbolTable.
@@ -390,7 +393,9 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			if (entry.type instanceof RefTypeNode) {
 				STentry methodEntry = classTable.get(((RefTypeNode) entry.type).id).get(node.methodId);
 			} else{
-				System.out.println("Object id " + node.objectId + " at line "+ node.getLine() + " has no method " + node.methodId);
+				System.out.println(
+					"Object id " + node.objectId + " at line "+ node.getLine() + " has no method " + node.methodId
+				);
 				symbolTableErrors++;
 			}
 		}
