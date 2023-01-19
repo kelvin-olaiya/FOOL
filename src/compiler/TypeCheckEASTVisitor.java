@@ -25,33 +25,33 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ProgLetInNode n) throws TypeException {
 		if (print) printNode(n);
-		for (Node dec : n.declist)
+		for (Node dec : n.declarationList)
 			try {
 				visit(dec);
 			} catch (IncomplException e) { 
 			} catch (TypeException e) {
 				System.out.println("Type checking error in a declaration: " + e.text);
 			}
-		return visit(n.exp);
+		return visit(n.expression);
 	}
 
 	@Override
 	public TypeNode visitNode(ProgNode n) throws TypeException {
 		if (print) printNode(n);
-		return visit(n.exp);
+		return visit(n.expression);
 	}
 
 	@Override
 	public TypeNode visitNode(FunNode n) throws TypeException {
 		if (print) printNode(n,n.id);
-		for (Node dec : n.declist)
+		for (Node dec : n.declarationsList)
 			try {
 				visit(dec);
 			} catch (IncomplException e) { 
 			} catch (TypeException e) {
 				System.out.println("Type checking error in a declaration: " + e.text);
 			}
-		if ( !isSubtype(visit(n.exp),ckvisit(n.retType)) ) 
+		if ( !isSubtype(visit(n.expression),ckvisit(n.returnType)) )
 			throw new TypeException("Wrong return type for function " + n.id,n.getLine());
 		return null;
 	}
@@ -59,7 +59,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(VarNode n) throws TypeException {
 		if (print) printNode(n,n.id);
-		if ( !isSubtype(visit(n.exp),ckvisit(n.getType())) )
+		if ( !isSubtype(visit(n.expression),ckvisit(n.getType())) )
 			throw new TypeException("Incompatible value for variable " + n.id,n.getLine());
 		return null;
 	}
@@ -67,16 +67,16 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(PrintNode n) throws TypeException {
 		if (print) printNode(n);
-		return visit(n.exp);
+		return visit(n.expression);
 	}
 
 	@Override
 	public TypeNode visitNode(IfNode n) throws TypeException {
 		if (print) printNode(n);
-		if ( !(isSubtype(visit(n.cond), new BoolTypeNode())) )
+		if ( !(isSubtype(visit(n.condition), new BoolTypeNode())) )
 			throw new TypeException("Non boolean condition in if",n.getLine());
-		TypeNode t = visit(n.th);
-		TypeNode e = visit(n.el);
+		TypeNode t = visit(n.thenBranch);
+		TypeNode e = visit(n.elseBranch);
 		if (isSubtype(t, e)) return e;
 		if (isSubtype(e, t)) return t;
 		throw new TypeException("Incompatible types in then-else branches",n.getLine());
@@ -135,7 +135,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
   @Override
 	public TypeNode visitNode(NotNode n) throws TypeException {
 		if (print) printNode(n);
-		TypeNode r = visit(n.right);
+		TypeNode r = visit(n.expression);
 		if (!(isSubtype(r, new IntTypeNode())))
 			throw new TypeException("Incompatible type in not", n.getLine());
 		return new BoolTypeNode();
@@ -182,22 +182,22 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(CallNode n) throws TypeException {
 		if (print) printNode(n,n.id);
-		TypeNode t = visit(n.entry); 
+		TypeNode t = visit(n.symbolTableEntry);
 		if ( !(t instanceof ArrowTypeNode) )
 			throw new TypeException("Invocation of a non-function "+n.id,n.getLine());
 		ArrowTypeNode at = (ArrowTypeNode) t;
-		if ( !(at.parlist.size() == n.arglist.size()) )
+		if ( !(at.parametersList.size() == n.argumentsList.size()) )
 			throw new TypeException("Wrong number of parameters in the invocation of "+n.id,n.getLine());
-		for (int i = 0; i < n.arglist.size(); i++)
-			if ( !(isSubtype(visit(n.arglist.get(i)),at.parlist.get(i))) )
+		for (int i = 0; i < n.argumentsList.size(); i++)
+			if ( !(isSubtype(visit(n.argumentsList.get(i)),at.parametersList.get(i))) )
 				throw new TypeException("Wrong type for "+(i+1)+"-th parameter in the invocation of "+n.id,n.getLine());
-		return at.ret;
+		return at.returnType;
 	}
 
 	@Override
 	public TypeNode visitNode(IdNode n) throws TypeException {
 		if (print) printNode(n,n.id);
-		TypeNode t = visit(n.entry); 
+		TypeNode t = visit(n.symbolTableEntry);
 		if (t instanceof ArrowTypeNode)
 			throw new TypeException("Wrong usage of function identifier " + n.id,n.getLine());
 		return t;
@@ -205,13 +205,13 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 
 	@Override
 	public TypeNode visitNode(BoolNode n) {
-		if (print) printNode(n,n.val.toString());
+		if (print) printNode(n,n.value.toString());
 		return new BoolTypeNode();
 	}
 
 	@Override
 	public TypeNode visitNode(IntNode n) {
-		if (print) printNode(n,n.val.toString());
+		if (print) printNode(n,n.value.toString());
 		return new IntTypeNode();
 	}
 
@@ -220,8 +220,8 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ArrowTypeNode n) throws TypeException {
 		if (print) printNode(n);
-		for (Node par: n.parlist) visit(par);
-		visit(n.ret,"->"); //marks return type
+		for (Node par: n.parametersList) visit(par);
+		visit(n.returnType,"->"); //marks return type
 		return null;
 	}
 
