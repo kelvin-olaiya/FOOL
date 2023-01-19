@@ -497,6 +497,7 @@ public class AST {
             this.allFields = allFields;
             this.allMethods = allMethods;
         }
+
         @Override
         public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
             return null;
