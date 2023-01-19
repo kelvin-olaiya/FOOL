@@ -25,7 +25,7 @@ import compiler.lib.*;
  */
 public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 	
-	private List<Map<String, STentry>> symbolTable = new ArrayList<>();
+	private final List<Map<String, STentry>> symbolTable = new ArrayList<>();
 	Map<String, Map<String,STentry>> classTable = new HashMap<>();
 	private int nestingLevel=0; // current nesting level
 	private int declarationOffset =-2; // counter for offset of local declarations at current nesting level
