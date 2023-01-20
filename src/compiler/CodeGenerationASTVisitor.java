@@ -7,295 +7,348 @@ import static compiler.lib.FOOLlib.*;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
-  CodeGenerationASTVisitor() {}
-  CodeGenerationASTVisitor(boolean debug) {super(false,debug);} //enables print for debugging
+	CodeGenerationASTVisitor() {}
+	CodeGenerationASTVisitor(boolean debug) {
+	super(false, debug);
+	}
 
 	@Override
-	public String visitNode(ProgLetInNode n) {
-		if (print) printNode(n);
-		String declCode = null;
-		for (Node dec : n.declarationList) declCode=nlJoin(declCode,visit(dec));
+	public String visitNode(ProgLetInNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String declarationListCode = null;
+		for (Node declaration : node.declarationList) {
+			declarationListCode = nlJoin(declarationListCode, visit(declaration));
+		}
 		return nlJoin(
 			"push 0",	
-			declCode, // generate code for declarations (allocation)			
-			visit(n.expression),
+			declarationListCode, // generate code for declarations (allocation)
+			visit(node.expression),
 			"halt",
 			getCode()
 		);
 	}
 
 	@Override
-	public String visitNode(ProgNode n) {
-		if (print) printNode(n);
+	public String visitNode(ProgNode node) {
+		if (print) {
+			printNode(node);
+		}
 		return nlJoin(
-			visit(n.expression),
+			visit(node.expression),
 			"halt"
 		);
 	}
 
 	@Override
-	public String visitNode(FunNode n) {
-		if (print) printNode(n,n.id);
-		String declCode = null, popDecl = null, popParl = null;
-		for (Node dec : n.declarationsList) {
-			declCode = nlJoin(declCode,visit(dec));
-			popDecl = nlJoin(popDecl,"pop");
+	public String visitNode(FunNode node) {
+		if (print) printNode(node, node.id);
+		String declarationListCode = null;
+		String popDeclarationsList = null;
+		String popParametersList = null;
+		for (Node declaration : node.declarationsList) {
+			declarationListCode = nlJoin(declarationListCode, visit(declaration));
+			popDeclarationsList = nlJoin(popDeclarationsList, "pop");
 		}
-		for (int i = 0; i<n.parametersList.size(); i++) popParl = nlJoin(popParl,"pop");
-		String funl = freshFunLabel();
+		for (int i = 0; i < node.parametersList.size(); i++) {
+			popParametersList = nlJoin(popParametersList, "pop");
+		}
+		String functionLabel = freshFunLabel();
 		putCode(
 			nlJoin(
-				funl+":",
+				functionLabel + ":",
 				"cfp", // set $fp to $sp value
 				"lra", // load $ra value
-				declCode, // generate code for local declarations (they use the new $fp!!!)
-				visit(n.expression), // generate code for function body expression
+				declarationListCode, // generate code for local declarations (they use the new $fp!!!)
+				visit(node.expression), // generate code for function body expression
 				"stm", // set $tm to popped value (function result)
-				popDecl, // remove local declarations from stack
+				popDeclarationsList, // remove local declarations from stack
 				"sra", // set $ra to popped value
 				"pop", // remove Access Link from stack
-				popParl, // remove parameters from stack
+				popParametersList, // remove parameters from stack
 				"sfp", // set $fp to popped value (Control Link)
 				"ltm", // load $tm value (function result)
 				"lra", // load $ra value
 				"js"  // jump to to popped address
 			)
 		);
-		return "push "+funl;		
+		return "push " + functionLabel;
 	}
 
 	@Override
-	public String visitNode(VarNode n) {
-		if (print) printNode(n,n.id);
-		return visit(n.expression);
+	public String visitNode(VarNode node) {
+		if (print) {
+			printNode(node, node.id);
+		}
+		return visit(node.expression);
 	}
 
 	@Override
-	public String visitNode(PrintNode n) {
-		if (print) printNode(n);
+	public String visitNode(PrintNode node) {
+		if (print) {
+			printNode(node);
+		}
 		return nlJoin(
-			visit(n.expression),
+			visit(node.expression),
 			"print"
 		);
 	}
 
 	@Override
-	public String visitNode(IfNode n) {
-		if (print) printNode(n);
-	 	String l1 = freshLabel();
-	 	String l2 = freshLabel();		
+	public String visitNode(IfNode node) {
+		if (print) {
+			printNode(node);
+		}
+	 	String label1 = freshLabel();
+	 	String label2 = freshLabel();
 		return nlJoin(
-			visit(n.condition),
+			visit(node.condition),
 			"push 1",
-			"beq "+l1,
-			visit(n.elseBranch),
-			"b "+l2,
-			l1+":",
-			visit(n.thenBranch),
-			l2+":"
+			"beq " + label1,
+			visit(node.elseBranch),
+			"b " + label2,
+			label1 + ":",
+			visit(node.thenBranch),
+			label2 + ":"
 		);
 	}
 
 	@Override
-	public String visitNode(EqualNode n) {
-		if (print) printNode(n);
-	 	String l1 = freshLabel();
-	 	String l2 = freshLabel();
+	public String visitNode(EqualNode node) {
+		if (print) {
+			printNode(node);
+		}
+	 	String label1 = freshLabel();
+	 	String label2 = freshLabel();
 		return nlJoin(
-			visit(n.left),
-			visit(n.right),
-			"beq "+l1,
+			visit(node.left),
+			visit(node.right),
+			"beq " + label1,
 			"push 0",
-			"b "+l2,
-			l1+":",
+			"b " + label2,
+			label1 + ":",
 			"push 1",
-			l2+":"
+			label2 + ":"
 		);
 	}
 
 	@Override
-	public String visitNode(OrNode n) {
-		if (print) printNode(n);
-		String l1 = freshLabel();
-		String l2 = freshLabel();
-		String l3 = freshLabel();
-		String l4 = freshLabel();
+	public String visitNode(OrNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String label1 = freshLabel();
+		String label2 = freshLabel();
+		String label3 = freshLabel();
+		String label4 = freshLabel();
 		return nlJoin(
-			visit(n.left),
+			visit(node.left),
 			"push 0",
-			"beq " + l1,
-			"b " + l2,
-			l1 + ":",
-			visit(n.right),
+			"beq " + label1,
+			"b " + label2,
+			label1 + ":",
+			visit(node.right),
 			"push 0",
-			"beq " + l3,
-			l2 + ":",
+			"beq " + label3,
+			label2 + ":",
 			"push 1",
-			"b " + l4,
-			l3 + ":",
+			"b " + label4,
+			label3 + ":",
 			"push 0",
-			l4+":"
+			label4+":"
 		);
 	}
 
 	@Override
-	public String visitNode(AndNode n) {
-		if (print) printNode(n);
-		String l1 = freshLabel();
-		String l2 = freshLabel();
+	public String visitNode(AndNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String label1 = freshLabel();
+		String label2 = freshLabel();
 		return nlJoin(
-			visit(n.left),
+			visit(node.left),
 			"push 0",
-			"beq " + l1,
-			visit(n.right),
+			"beq " + label1,
+			visit(node.right),
 			"push 0",
-			"beq " +l1,
+			"beq " +label1,
 			"push 1",
-			"b  " + l2,
-			l1 + ":",
+			"b  " + label2,
+			label1 + ":",
 			"push 0",
-			l2+":"
+			label2+":"
 		);
   	}
   
   	@Override
-	public String visitNode(NotNode n) {
-		if (print) printNode(n);
-		String l1 = freshLabel();
-		String l2 = freshLabel();
+	public String visitNode(NotNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String label1 = freshLabel();
+		String label2 = freshLabel();
 		return nlJoin(
-				visit(n.expression),
-				"push 0",
-				"beq "+l1,
-				"push 0",
-				"b "+l2,
-				l1+":",
-				"push 1",
-				l2+":"
-		);
-	}
-
-
-	@Override
-	public String visitNode(LessEqualNode n) {
-		if (print) printNode(n);
-		String l1 = freshLabel();
-		String l2 = freshLabel();
-		return nlJoin(
-				visit(n.left),
-				visit(n.right),
-				"bleq "+l1,
-				"push 0",
-				"b "+l2,
-				l1+":",
-				"push 1",
-				l2+":"
+			visit(node.expression),
+			"push 0",
+			"beq " + label1,
+			"push 0",
+			"b " + label2,
+			label1 + ":",
+			"push 1",
+			label2 + ":"
 		);
 	}
 
 	@Override
-	public String visitNode(GreaterEqualNode n) {
-		if (print) printNode(n);
-		String l1 = freshLabel();
-		String l2 = freshLabel();
+	public String visitNode(LessEqualNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String label1 = freshLabel();
+		String label2 = freshLabel();
 		return nlJoin(
-				visit(n.right),
-				visit(n.left),
-				"sub",
-				"push 0",
-				"bleq " + l1,
-				"push 0",
-				"b "+l2,
-				l1+":",
-				"push 1",
-				l2+":"
+			visit(node.left),
+			visit(node.right),
+			"bleq " + label1,
+			"push 0",
+			"b " + label2,
+			label1 + ":",
+			"push 1",
+			label2 + ":"
 		);
 	}
 
 	@Override
-	public String visitNode(TimesNode n) {
-		if (print) printNode(n);
+	public String visitNode(GreaterEqualNode node) {
+		if (print) {
+			printNode(node);
+		}
+		String label1 = freshLabel();
+		String label2 = freshLabel();
 		return nlJoin(
-			visit(n.left),
-			visit(n.right),
+			visit(node.right),
+			visit(node.left),
+			"sub",
+			"push 0",
+			"bleq " + label1,
+			"push 0",
+			"b " + label2,
+			label1 + ":",
+			"push 1",
+			label2 + ":"
+		);
+	}
+
+	@Override
+	public String visitNode(TimesNode node) {
+		if (print) {
+			printNode(node);
+		}
+		return nlJoin(
+			visit(node.left),
+			visit(node.right),
 			"mult"
 		);	
 	}
 
 	@Override
-	public String visitNode(DivNode n) {
-		if (print) printNode(n);
+	public String visitNode(DivNode node) {
+		if (print) {
+			printNode(node);
+		}
 		return nlJoin(
-				visit(n.left),
-				visit(n.right),
-				"div"
+			visit(node.left),
+			visit(node.right),
+			"div"
 		);
 	}
 
-
-
 	@Override
-	public String visitNode(PlusNode n) {
-		if (print) printNode(n);
+	public String visitNode(PlusNode node) {
+		if (print) {
+			printNode(node);
+		}
 		return nlJoin(
-			visit(n.left),
-			visit(n.right),
+			visit(node.left),
+			visit(node.right),
 			"add"				
 		);
 	}
 
 	@Override
-	public String visitNode(MinusNode n) {
-		if (print) printNode(n);
+	public String visitNode(MinusNode node) {
+		if (print) {
+			printNode(node);
+		}
 		return nlJoin(
-				visit(n.left),
-				visit(n.right),
-				"sub"
+			visit(node.left),
+			visit(node.right),
+			"sub"
 		);
 	}
 
 	@Override
-	public String visitNode(CallNode n) {
-		if (print) printNode(n,n.id);
-		String argCode = null, getAR = null;
-		for (int i = n.argumentsList.size()-1; i>=0; i--) argCode=nlJoin(argCode,visit(n.argumentsList.get(i)));
-		for (int i = 0; i<n.nestingLevel -n.symbolTableEntry.nestingLevel; i++) getAR=nlJoin(getAR,"lw");
+	public String visitNode(CallNode node) {
+		if (print) {
+			printNode(node, node.id);
+		}
+		String argumentsCode = null;
+		String getActivationRecordCode = null;
+		for (int i = node.argumentsList.size()-1; i >= 0; i--) {
+			argumentsCode = nlJoin(argumentsCode, visit(node.argumentsList.get(i)));
+		}
+		for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nestingLevel; i++) {
+			getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
+		}
 		return nlJoin(
 			"lfp", // load Control Link (pointer to frame of function "id" caller)
-			argCode, // generate code for argument expressions in reversed order
-			"lfp", getAR, // retrieve address of frame containing "id" declaration
+			argumentsCode, // generate code for argument expressions in reversed order
+			"lfp", getActivationRecordCode, // retrieve address of frame containing "id" declaration
                           // by following the static chain (of Access Links)
             "stm", // set $tm to popped value (with the aim of duplicating top of stack)
             "ltm", // load Access Link (pointer to frame of function "id" declaration)
             "ltm", // duplicate top of stack
-            "push "+n.symbolTableEntry.offset, "add", // compute address of "id" declaration
+            "push " + node.symbolTableEntry.offset, "add", // compute address of "id" declaration
 			"lw", // load address of "id" function
             "js"  // jump to popped address (saving address of subsequent instruction in $ra)
 		);
 	}
 
 	@Override
-	public String visitNode(IdNode n) {
-		if (print) printNode(n,n.id);
-		String getAR = null;
-		for (int i = 0; i<n.nestingLevel -n.symbolTableEntry.nestingLevel; i++) getAR=nlJoin(getAR,"lw");
+	public String visitNode(IdNode node) {
+		if (print) {
+			printNode(node, node.id);
+		}
+		String getActivationRecordCode = null;
+		for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nestingLevel; i++) {
+			getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
+		}
 		return nlJoin(
-			"lfp", getAR, // retrieve address of frame containing "id" declaration
-			              // by following the static chain (of Access Links)
-			"push "+n.symbolTableEntry.offset, "add", // compute address of "id" declaration
+		"lfp",
+			/*
+			 * Retrieve address of frame containing "id" declaration by following the static chain (of Access Links)
+			 */
+			getActivationRecordCode,
+			"push "+node.symbolTableEntry.offset, "add", // compute address of "id" declaration
 			"lw" // load value of "id" variable
 		);
 	}
 
 	@Override
-	public String visitNode(BoolNode n) {
-		if (print) printNode(n,n.value.toString());
-		return "push "+(n.value ?1:0);
+	public String visitNode(BoolNode node) {
+		if (print) {
+			printNode(node, node.value.toString());
+		}
+		return "push " + (node.value ? 1 : 0);
 	}
 
 	@Override
-	public String visitNode(IntNode n) {
-		if (print) printNode(n,n.value.toString());
-		return "push "+n.value;
+	public String visitNode(IntNode node) {
+		if (print) {
+			printNode(node, node.value.toString());
+		}
+		return "push " + node.value;
 	}
 }
