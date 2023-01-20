@@ -418,7 +418,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		} else {
 			node.symbolTableEntry = entry;
 			if (entry.type instanceof RefTypeNode) {
-				STentry methodEntry = classTable.get(((RefTypeNode) entry.type).id).get(node.methodId);
+				node.methodEntry = classTable.get(((RefTypeNode) entry.type).id).get(node.methodId);
 			} else{
 				System.out.println(
 					"Object id " + node.objectId + " at line "+ node.getLine() + " has no method " + node.methodId

@@ -297,17 +297,42 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 			printNode(node, node.id);
 		}
 		TypeNode functionType = visit(node.symbolTableEntry);
-		if (!(functionType instanceof ArrowTypeNode)) {
+		if (functionType instanceof MethodTypeNode) {
+			functionType = ((MethodTypeNode) functionType).functionalType;
+		} else if (!(functionType instanceof ArrowTypeNode)) {
 			throw new TypeException("Invocation of a non-function "+node.id,node.getLine());
 		}
 		ArrowTypeNode arrowType = (ArrowTypeNode) functionType;
 		if (!(arrowType.parametersList.size() == node.argumentsList.size())) {
-			throw new TypeException("Wrong number of parameters in the invocation of "+node.id,node.getLine());
+			throw new TypeException("Wrong number of parameters in the invocation of "+node.id, node.getLine());
 		}
 		for (int i = 0; i < node.argumentsList.size(); i++) {
 			if (!(isSubtype(visit(node.argumentsList.get(i)), arrowType.parametersList.get(i)))) {
 				throw new TypeException(
 					"Wrong type for " + (i+1) + "-th parameter in the invocation of " + node.id, node.getLine()
+				);
+			}
+		}
+		return arrowType.returnType;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassCallNode node) throws TypeException {
+		if (print) {
+			printNode(node);
+		}
+		TypeNode methodType = visit(node.methodEntry);
+		if (!(methodType instanceof MethodTypeNode)) {
+			throw new TypeException("Invocation of a non-method " + node.methodId, node.getLine());
+		}
+		ArrowTypeNode arrowType = ((MethodTypeNode) methodType).functionalType;
+		if (node.argumentsList.size() != arrowType.parametersList.size()) {
+			throw new TypeException("Wrong number of parameters in the invocation of " + node.methodId, node.getLine());
+		}
+		for (var i = 0; i < node.argumentsList.size(); i++) {
+			if (!isSubtype(visit(node.argumentsList.get(i)), arrowType.parametersList.get(i))) {
+				throw new TypeException(
+					"Wrong type for " + (i+1) + "-th parameter in the invocation of " + node.methodId, node.getLine()
 				);
 			}
 		}
@@ -348,6 +373,15 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 			printNode(node);
 		}
 		return new EmptyTypeNode();
+	}
+
+	@Override
+	public TypeNode visitNode(MethodTypeNode node) throws TypeException {
+		if (print) {
+			printNode(node);
+		}
+		visit(node.functionalType);
+		return null;
 	}
 
 	// gestione tipi incompleti	(se lo sono lancia eccezione)
