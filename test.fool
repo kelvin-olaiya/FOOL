@@ -10,3 +10,4 @@ let
     var bl:A = new A(true,true);
 in
     print(bl.getBool(true));
+
