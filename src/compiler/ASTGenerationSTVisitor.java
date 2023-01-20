@@ -61,7 +61,9 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         for (var classDec : c.cldec()) {
             declist.add((DecNode) visit(classDec));
         }
-        for (DecContext dec : c.dec()) declist.add((DecNode) visit(dec));
+        for (DecContext dec : c.dec()) {
+            declist.add((DecNode) visit(dec));
+        }
         return new ProgLetInNode(declist, visit(c.exp()));
     }
 

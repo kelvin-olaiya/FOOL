@@ -186,7 +186,10 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		declarationOffset = 0; // TODO: why should we do this?
 		for (var method : node.methods) {
 			visit(method);
-			classType.allMethods.add(method.offset, (ArrowTypeNode) classScopeTable.get(method.id).type);
+			classType.allMethods.add(
+				method.offset,
+				((MethodTypeNode) classScopeTable.get(method.id).type).functionalType
+			);
 		}
 		declarationOffset = currentDecOffset;
 		symbolTable.remove(--nestingLevel);
