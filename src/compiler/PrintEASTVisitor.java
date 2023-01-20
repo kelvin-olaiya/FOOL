@@ -46,6 +46,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void, VoidException> {
         return null;
     }
 
+    @Override
     public Void visitNode(MethodNode node) {
         printNode(node, node.id);
         visit(node.returnType);
@@ -63,6 +64,12 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void, VoidException> {
     public Void visitNode(NewNode node) {
         printNode(node, node.id);
         visit(node.classSymbolTableEntry);
+        return null;
+    }
+
+    @Override
+    public Void visitNode(RefTypeNode node) {
+        printNode(node, node.id);
         return null;
     }
 

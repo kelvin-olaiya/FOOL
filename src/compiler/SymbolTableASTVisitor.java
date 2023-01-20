@@ -85,7 +85,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		for (ParNode parameter : node.parametersList) {
 			parametersTypes.add(parameter.getType());
 		}
-		final TypeNode functionType = new ArrowTypeNode(parametersTypes,node.returnType);
+		final TypeNode functionType = new ArrowTypeNode(parametersTypes, node.returnType);
 		/*
 		 * Insert ID into the symbolTable. Output an error if ID already exists in current scope.
 		 */
@@ -253,8 +253,20 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			symbolTableErrors++;
 		}
 		node.classSymbolTableEntry = symbolTable.get(0).get(node.id);
+		for (var argument : node.argumentsList) {
+			visit(argument);
+		}
 		return null;
 	}
+
+	@Override
+	public Void visitNode(RefTypeNode node) {
+		if (print) {
+			printNode(node, node.id);
+		}
+		return null;
+	}
+
 	@Override
 	public Void visitNode(PrintNode node) {
 		if (print) {

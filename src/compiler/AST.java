@@ -418,9 +418,11 @@ public class AST {
 
         STentry classSymbolTableEntry;
         final String id;
+        List<Node> argumentsList;
 
-        NewNode(String id) {
+        NewNode(String id, List<Node> arguments) {
             this.id = id;
+            this.argumentsList = Collections.unmodifiableList(arguments);
         }
 
         @Override
@@ -512,6 +514,22 @@ public class AST {
             this.allFields = allFields;
             this.allMethods = allMethods;
         }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return visitor.visitNode(this);
+        }
+    }
+
+    public static class EmptyNode extends Node {
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return visitor.visitNode(this);
+        }
+    }
+
+    public static class EmptyTypeNode extends TypeNode {
 
         @Override
         public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {

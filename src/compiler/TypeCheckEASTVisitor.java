@@ -3,6 +3,10 @@ package compiler;
 import compiler.AST.*;
 import compiler.exc.*;
 import compiler.lib.*;
+
+import java.lang.annotation.Native;
+import java.util.stream.Collectors;
+
 import static compiler.TypeRels.*;
 
 /**
@@ -69,6 +73,63 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 			throw new TypeException("Wrong return type for function " + node.id,node.getLine());
 		}
 		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(NewNode node) throws TypeException {
+		if (print) {
+			printNode(node, node.id);
+		}
+		var classFields = ((ClassTypeNode) node.classSymbolTableEntry.type).allFields;
+		if (node.argumentsList.size() != classFields.size()) {
+			throw new TypeException(
+				"Wrong number of parameters for new instance of class id " + node.id,
+				node.getLine()
+			);
+		}
+		for (var i = 0; i < classFields.size(); i++) {
+			if (!isSubtype(visit(node.argumentsList.get(i)), classFields.get(i))) {
+				throw new TypeException(
+					"Wrong type for " + (i+1) + "-th parameter in the invocation of " + node.id,
+					node.getLine()
+				);
+			}
+		}
+		return new RefTypeNode(node.id);
+	}
+
+	@Override
+	public TypeNode visitNode(MethodNode node) throws TypeException {
+		if (print) {
+			printNode(node);
+		}
+		for (Node declaration : node.declarationsList) {
+			try {
+				visit(declaration);
+			} catch (IncomplException e) {
+			} catch (TypeException e) {
+				System.out.println("Type checking error in a declaration: " + e.text);
+			}
+		}
+		if (!isSubtype(visit(node.expression), checkVisit(node.returnType))) {
+			throw new TypeException("Wrong return type for method " + node.id,node.getLine());
+		}
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(ClassNode node) throws TypeException {
+		if (print) {
+			printNode(node);
+		}
+		for (var method : node.methods) {
+			visit(method);
+		}
+		return new ClassTypeNode(
+			node.fields.stream().map(DecNode::getType).collect(Collectors.toList()),
+			node.methods.stream()
+					.map(methodNode -> (ArrowTypeNode) methodNode.getType()).collect(Collectors.toList())
+		);
 	}
 
 	@Override
@@ -244,7 +305,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 			throw new TypeException("Wrong number of parameters in the invocation of "+node.id,node.getLine());
 		}
 		for (int i = 0; i < node.argumentsList.size(); i++) {
-			if (!(isSubtype(visit(node.argumentsList.get(i)),arrowType.parametersList.get(i)))) {
+			if (!(isSubtype(visit(node.argumentsList.get(i)), arrowType.parametersList.get(i)))) {
 				throw new TypeException(
 					"Wrong type for " + (i+1) + "-th parameter in the invocation of " + node.id, node.getLine()
 				);
@@ -304,6 +365,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 
 	@Override
 	public TypeNode visitNode(IntTypeNode node) {
+		if (print) {
+			printNode(node);
+		}
+		return null;
+	}
+
+	@Override
+	public TypeNode visitNode(RefTypeNode node) {
 		if (print) {
 			printNode(node);
 		}

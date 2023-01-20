@@ -83,7 +83,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         String classID = c.ID(0).getText();
         List<FieldNode> fields = new ArrayList<>();
         IntStream.range(1, c.ID().size()).forEach(i -> {
-            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i))));
+            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i-1))));
         });
         List<MethodNode> methods = new ArrayList<>();
         for (var method : c.methdec()) {
@@ -115,7 +115,11 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         if (print) {
             printVarAndProdName(c);
         }
-        return new NewNode(c.ID().getText());
+        List<Node> argumentsList = new ArrayList<>();
+        for (var i = 0; i < c.exp().size(); i++) {
+            argumentsList.add(visit(c.exp(i)));
+        }
+        return new NewNode(c.ID().getText(), argumentsList);
     }
 
     @Override
@@ -241,6 +245,14 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
             printVarAndProdName(c);
         }
         return new BoolTypeNode();
+    }
+
+    @Override
+    public Node visitIdType(IdTypeContext c) {
+        if (print) {
+            printVarAndProdName(c);
+        }
+        return new RefTypeNode(c.ID().getText());
     }
 
     @Override
