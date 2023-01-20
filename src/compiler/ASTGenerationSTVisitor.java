@@ -256,6 +256,14 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     }
 
     @Override
+    public Node visitNull(NullContext c) {
+        if (print) {
+            printVarAndProdName(c);
+        }
+        return new EmptyNode();
+    }
+
+    @Override
     public Node visitInteger(IntegerContext c) {
         if (print) {
             printVarAndProdName(c);

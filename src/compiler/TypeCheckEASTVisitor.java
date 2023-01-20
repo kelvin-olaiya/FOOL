@@ -342,6 +342,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		return new IntTypeNode();
 	}
 
+	@Override
+	public TypeNode visitNode(EmptyNode node) {
+		if (print) {
+			printNode(node);
+		}
+		return new EmptyTypeNode();
+	}
+
 	// gestione tipi incompleti	(se lo sono lancia eccezione)
 	@Override
 	public TypeNode visitNode(ArrowTypeNode node) throws TypeException {
