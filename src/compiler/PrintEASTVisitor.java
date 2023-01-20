@@ -60,6 +60,13 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void, VoidException> {
     }
 
     @Override
+    public Void visitNode(NewNode node) {
+        printNode(node, node.id);
+        visit(node.classSymbolTableEntry);
+        return null;
+    }
+
+    @Override
     public Void visitNode(FunNode node) {
         printNode(node, node.id);
         visit(node.returnType);
@@ -193,6 +200,7 @@ public class PrintEASTVisitor extends BaseEASTVisitor<Void, VoidException> {
         return null;
     }
 
+    @Override
     public Void visitNode(ClassCallNode node) {
         printNode(node, node.objectId + "." +  node.methodId + " at nestingLevel " + node.nestingLevel);
         visit(node.methodEntry);

@@ -414,6 +414,21 @@ public class AST {
         }
     }
 
+    public static class NewNode extends Node {
+
+        STentry classSymbolTableEntry;
+        final String id;
+
+        NewNode(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public <S, E extends Exception> S accept(BaseASTVisitor<S, E> visitor) throws E {
+            return visitor.visitNode(this);
+        }
+    }
+
     public static class BoolNode extends Node {
 
         final Boolean value;

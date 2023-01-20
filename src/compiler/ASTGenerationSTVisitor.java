@@ -111,6 +111,14 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
     }
 
     @Override
+    public Node visitNew(NewContext c) {
+        if (print) {
+            printVarAndProdName(c);
+        }
+        return new NewNode(c.ID().getText());
+    }
+
+    @Override
     public Node visitTimesDiv(TimesDivContext c) {
         if (print) {
             printVarAndProdName(c);

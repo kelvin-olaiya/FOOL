@@ -192,7 +192,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 			);
 		}
 		declarationOffset = currentDecOffset;
-		symbolTable.remove(--nestingLevel);
+		symbolTable.remove(nestingLevel--);
 		declarationOffset = previousNestingLevelDeclarationOffset;
 		return null;
 	}
@@ -243,6 +243,18 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void,VoidException> {
 		return null;
 	}
 
+	@Override
+	public Void visitNode(NewNode node) {
+		if (print) {
+			printNode(node);
+		}
+		if (!classTable.containsKey(node.id)) {
+			System.out.println("Class id " + node.id + " does not exist");
+			symbolTableErrors++;
+		}
+		node.classSymbolTableEntry = symbolTable.get(0).get(node.id);
+		return null;
+	}
 	@Override
 	public Void visitNode(PrintNode node) {
 		if (print) {
