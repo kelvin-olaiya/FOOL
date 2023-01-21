@@ -31,12 +31,12 @@ public class Test {
     	System.out.println("You had "+symtableVisitor.symbolTableErrors +" symbol table errors.\n");
 
     	System.out.println("Visualizing Enriched AST.");
-    	// new PrintEASTVisitor().visit(ast);
+    	new PrintEASTVisitor().visit(ast);
     	System.out.println("");
 
     	System.out.println("Checking Types.");
     	try {
-    		TypeCheckEASTVisitor typeCheckVisitor = new TypeCheckEASTVisitor(true);
+    		TypeCheckEASTVisitor typeCheckVisitor = new TypeCheckEASTVisitor();
     		TypeNode mainType = typeCheckVisitor.visit(ast);
     		System.out.print("Type of main program expression is: ");
     		new PrintEASTVisitor().visit(mainType);
