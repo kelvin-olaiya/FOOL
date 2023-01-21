@@ -97,11 +97,11 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         }
         String declarationListCode = null;
         String popDeclarationsList = null;
-        String popParametersList = null;
         for (Node declaration : node.declarationsList) {
             declarationListCode = nlJoin(declarationListCode, visit(declaration));
             popDeclarationsList = nlJoin(popDeclarationsList, "pop");
         }
+        String popParametersList = null;
         for (int i = 0; i < node.parametersList.size(); i++) {
             popParametersList = nlJoin(popParametersList, "pop");
         }
@@ -141,7 +141,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             dispatchTable.add(methodNode.offset, methodNode.label);
         });
 
-        String createDispatchTable = "";
+        String createDispatchTable = null;
         for (String label : dispatchTable) {
             createDispatchTable = nlJoin(
                     createDispatchTable,
@@ -425,7 +425,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
                     "stm", // set $tm to popped value (with the aim of duplicating top of stack)
                     "ltm", // load Access Link (pointer to frame of function "id" declaration)
                     "ltm", // duplicate top of stack
-                    "lw", // jump to dispatch Table
+                    "lw", // load dispatchPointer
                     "push " + node.symbolTableEntry.offset,
                     "add", // compute address of "id" declaration
                     "lw", // load address of "id" function
@@ -469,9 +469,13 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
                 argumentsCode, // generate code for argument expressions in reversed order
                 "lfp", getActivationRecordCode, // retrieve address of frame containing "id" declaration
                 // by following the static chain (of Access Links)
+                "push " + node.symbolTableEntry.offset, // offset where to find the object pointer
+                "add",
+                "lw", // put the objectPointer
                 "stm", // set $tm to popped value (with the aim of duplicating top of stack)
                 "ltm", // load Access Link (pointer to frame of function "id" declaration)
                 "ltm", // duplicate top of stack
+                "lw",
                 "push " + node.methodEntry.offset, "add", // compute address of "id" declaration
                 "lw", // load address of "id" function
                 "js"  // jump to popped address (saving address of subsequent instruction in $ra)
@@ -483,14 +487,14 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) {
             printNode(node);
         }
-        String argumentsVisit = "";
+        String argumentsVisit = null;
         for(var argument : node.argumentsList) {
             argumentsVisit = nlJoin(
                 argumentsVisit,
                 visit(argument)
             );
         }
-        String loadArguments = "";
+        String loadArguments = null;
         for ( var i = 0; i < node.argumentsList.size(); i++) {
             loadArguments = nlJoin(
                     loadArguments,
@@ -508,9 +512,13 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             "/* START NewNode */",
             argumentsVisit,
             loadArguments,
-            "push " + (ExecuteVM.MEMSIZE + node.classSymbolTableEntry.offset),
+            "push " + ExecuteVM.MEMSIZE,
+            "push " + node.classSymbolTableEntry.offset,
+            "add",
+            "lw", // get dispatch pointer
             "lhp",
             "sw",
+            "lhp",
             "lhp",
             "push 1",
             "add",
