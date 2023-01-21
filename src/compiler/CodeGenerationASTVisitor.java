@@ -3,7 +3,7 @@ package compiler;
 import compiler.AST.*;
 import compiler.lib.*;
 import compiler.exc.*;
-import svm.ExecuteVM;
+import visualsvm.ExecuteVM;
 
 import java.util.ArrayList;
 import java.util.List;

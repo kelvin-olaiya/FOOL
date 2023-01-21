@@ -1,5 +1,5 @@
-// Generated from /home/kelvin/University/lcmc/FOOL/src/svm/SVM.g4 by ANTLR 4.10.1
-package svm;
+// Generated from /home/kelvin/University/lcmc/FOOL/src/visualsvm/SVM.g4 by ANTLR 4.10.1
+package visualsvm;
 
 import java.util.*;
 
@@ -96,12 +96,19 @@ public class SVMParser extends Parser {
 	@Override
 	public ATN getATN() { return _ATN; }
 
-	 
-	public int[] code = new int[ExecuteVM.CODESIZE];    
+
+	public int[] code = new int[ExecuteVM.CODESIZE];
+	public int[] sourceMap = new int[ExecuteVM.CODESIZE];
 	private int i = 0;
 	private Map<String,Integer> labelDef = new HashMap<>();
 	private Map<Integer,String> labelRef = new HashMap<>();
-
+	private void codem(int line, int ... c) {
+	   	for (int x : c) {
+	   		this.code[i] = x;
+	   		this.sourceMap[i] = line-1;
+	   		i++;
+	   	}
+	} 
 	public SVMParser(TokenStream input) {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
@@ -174,6 +181,7 @@ public class SVMParser extends Parser {
 	}
 
 	public static class InstructionContext extends ParserRuleContext {
+		public Token t;
 		public Token n;
 		public Token l;
 		public TerminalNode PUSH() { return getToken(SVMParser.PUSH, 0); }
@@ -232,78 +240,76 @@ public class SVMParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(13);
-				match(PUSH);
+				((InstructionContext)_localctx).t = match(PUSH);
 				setState(14);
 				((InstructionContext)_localctx).n = match(INTEGER);
-				code[i++] = PUSH; 
-							              code[i++] = Integer.parseInt((((InstructionContext)_localctx).n!=null?((InstructionContext)_localctx).n.getText():null));
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), PUSH, Integer.parseInt((((InstructionContext)_localctx).n!=null?((InstructionContext)_localctx).n.getText():null))); 
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(16);
-				match(PUSH);
+				((InstructionContext)_localctx).t = match(PUSH);
 				setState(17);
 				((InstructionContext)_localctx).l = match(LABEL);
-				code[i++] = PUSH; 
-					    		             labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null));
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), PUSH); labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null)); 
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(19);
-				match(POP);
-				code[i++] = POP;
+				((InstructionContext)_localctx).t = match(POP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), POP); 
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(21);
-				match(ADD);
-				code[i++] = ADD;
+				((InstructionContext)_localctx).t = match(ADD);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), ADD); 
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(23);
-				match(SUB);
-				code[i++] = SUB;
+				((InstructionContext)_localctx).t = match(SUB);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), SUB); 
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(25);
-				match(MULT);
-				code[i++] = MULT;
+				((InstructionContext)_localctx).t = match(MULT);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), MULT); 
 				}
 				break;
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
 				setState(27);
-				match(DIV);
-				code[i++] = DIV;
+				((InstructionContext)_localctx).t = match(DIV);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), DIV); 
 				}
 				break;
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
 				setState(29);
-				match(STOREW);
-				code[i++] = STOREW;
+				((InstructionContext)_localctx).t = match(STOREW);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), STOREW); 
 				}
 				break;
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
 				setState(31);
-				match(LOADW);
-				code[i++] = LOADW;
+				((InstructionContext)_localctx).t = match(LOADW);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), LOADW); 
 				}
 				break;
 			case 10:
@@ -313,136 +319,133 @@ public class SVMParser extends Parser {
 				((InstructionContext)_localctx).l = match(LABEL);
 				setState(34);
 				match(COL);
-				labelDef.put((((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null),i);
+				 labelDef.put((((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null), i); 
 				}
 				break;
 			case 11:
 				enterOuterAlt(_localctx, 11);
 				{
 				setState(36);
-				match(BRANCH);
+				((InstructionContext)_localctx).t = match(BRANCH);
 				setState(37);
 				((InstructionContext)_localctx).l = match(LABEL);
-				code[i++] = BRANCH;
-				                       labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null));
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), BRANCH); labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null)); 
 				}
 				break;
 			case 12:
 				enterOuterAlt(_localctx, 12);
 				{
 				setState(39);
-				match(BRANCHEQ);
+				((InstructionContext)_localctx).t = match(BRANCHEQ);
 				setState(40);
 				((InstructionContext)_localctx).l = match(LABEL);
-				code[i++] = BRANCHEQ;
-				                        labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null));
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), BRANCHEQ); labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null)); 
 				}
 				break;
 			case 13:
 				enterOuterAlt(_localctx, 13);
 				{
 				setState(42);
-				match(BRANCHLESSEQ);
+				((InstructionContext)_localctx).t = match(BRANCHLESSEQ);
 				setState(43);
 				((InstructionContext)_localctx).l = match(LABEL);
-				code[i++] = BRANCHLESSEQ;
-				                          labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null));
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), BRANCHLESSEQ); labelRef.put(i++,(((InstructionContext)_localctx).l!=null?((InstructionContext)_localctx).l.getText():null)); 
 				}
 				break;
 			case 14:
 				enterOuterAlt(_localctx, 14);
 				{
 				setState(45);
-				match(JS);
-				code[i++] = JS;
+				((InstructionContext)_localctx).t = match(JS);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), JS); 
 				}
 				break;
 			case 15:
 				enterOuterAlt(_localctx, 15);
 				{
 				setState(47);
-				match(LOADRA);
-				code[i++] = LOADRA;
+				((InstructionContext)_localctx).t = match(LOADRA);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), LOADRA); 
 				}
 				break;
 			case 16:
 				enterOuterAlt(_localctx, 16);
 				{
 				setState(49);
-				match(STORERA);
-				code[i++] = STORERA;
+				((InstructionContext)_localctx).t = match(STORERA);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), STORERA); 
 				}
 				break;
 			case 17:
 				enterOuterAlt(_localctx, 17);
 				{
 				setState(51);
-				match(LOADTM);
-				code[i++] = LOADTM;
+				((InstructionContext)_localctx).t = match(LOADTM);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), LOADTM); 
 				}
 				break;
 			case 18:
 				enterOuterAlt(_localctx, 18);
 				{
 				setState(53);
-				match(STORETM);
-				code[i++] = STORETM;
+				((InstructionContext)_localctx).t = match(STORETM);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), STORETM); 
 				}
 				break;
 			case 19:
 				enterOuterAlt(_localctx, 19);
 				{
 				setState(55);
-				match(LOADFP);
-				code[i++] = LOADFP;
+				((InstructionContext)_localctx).t = match(LOADFP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), LOADFP); 
 				}
 				break;
 			case 20:
 				enterOuterAlt(_localctx, 20);
 				{
 				setState(57);
-				match(STOREFP);
-				code[i++] = STOREFP;
+				((InstructionContext)_localctx).t = match(STOREFP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), STOREFP); 
 				}
 				break;
 			case 21:
 				enterOuterAlt(_localctx, 21);
 				{
 				setState(59);
-				match(COPYFP);
-				code[i++] = COPYFP;
+				((InstructionContext)_localctx).t = match(COPYFP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), COPYFP); 
 				}
 				break;
 			case 22:
 				enterOuterAlt(_localctx, 22);
 				{
 				setState(61);
-				match(LOADHP);
-				code[i++] = LOADHP;
+				((InstructionContext)_localctx).t = match(LOADHP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), LOADHP); 
 				}
 				break;
 			case 23:
 				enterOuterAlt(_localctx, 23);
 				{
 				setState(63);
-				match(STOREHP);
-				code[i++] = STOREHP;
+				((InstructionContext)_localctx).t = match(STOREHP);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), STOREHP); 
 				}
 				break;
 			case 24:
 				enterOuterAlt(_localctx, 24);
 				{
 				setState(65);
-				match(PRINT);
-				code[i++] = PRINT;
+				((InstructionContext)_localctx).t = match(PRINT);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), PRINT); 
 				}
 				break;
 			case 25:
 				enterOuterAlt(_localctx, 25);
 				{
 				setState(67);
-				match(HALT);
-				code[i++] = HALT;
+				((InstructionContext)_localctx).t = match(HALT);
+				 codem((((InstructionContext)_localctx).t!=null?((InstructionContext)_localctx).t.getLine():0), HALT); 
 				}
 				break;
 			}

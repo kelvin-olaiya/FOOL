@@ -1,5 +1,5 @@
-// Generated from /home/kelvin/University/lcmc/FOOL/src/svm/SVM.g4 by ANTLR 4.10.1
-package svm;
+// Generated from /home/kelvin/University/lcmc/FOOL/src/visualsvm/SVM.g4 by ANTLR 4.10.1
+package visualsvm;
 
 import java.util.*;
 
