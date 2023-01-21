@@ -30,11 +30,13 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             declarationListCode = nlJoin(declarationListCode, visit(declaration));
         }
         return nlJoin(
+                "/* START ProgLetInNode */",
                 "push 0",
                 declarationListCode, // generate code for declarations (allocation)
                 visit(node.expression),
                 "halt",
-                getCode()
+                getCode(),
+                "/* ------------------------- */"
         );
     }
 
@@ -44,6 +46,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START ProgNode */",
                 visit(node.expression),
                 "halt"
         );
@@ -67,6 +70,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String functionLabel = freshFunLabel();
         putCode(
                 nlJoin(
+                        "/* START Function: " + node.id + " */",
                         functionLabel + ":",
                         "cfp", // set $fp to $sp value
                         "lra", // load $ra value
@@ -105,6 +109,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         node.label = functionLabel;
         putCode(
                 nlJoin(
+                        "/* START Method: " + node.id +" */" ,
                         functionLabel + ":",
                         "cfp", // set $fp to $sp value
                         "lra", // load $ra value
@@ -152,6 +157,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
 
         return nlJoin(
+                "/* START ClassNOde */",
                 "lhp",
                 createDispatchTable
         );
@@ -163,7 +169,10 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) {
             printNode(node);
         }
-        return nlJoin("push -1");
+        return nlJoin(
+                "/* START EmptyNode */",
+                "push -1"
+        );
     }
 
 
@@ -181,6 +190,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START PrintNode */",
                 visit(node.expression),
                 "print"
         );
@@ -194,6 +204,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START IfNode */",
                 visit(node.condition),
                 "push 1",
                 "beq " + label1,
@@ -213,6 +224,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START EqualNode */",
                 visit(node.left),
                 visit(node.right),
                 "beq " + label1,
@@ -234,6 +246,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label3 = freshLabel();
         String label4 = freshLabel();
         return nlJoin(
+                "/* START OrNode */",
                 visit(node.left),
                 "push 0",
                 "beq " + label1,
@@ -259,6 +272,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START AndNode */",
                 visit(node.left),
                 "push 0",
                 "beq " + label1,
@@ -281,6 +295,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START NotNode */",
                 visit(node.expression),
                 "push 0",
                 "beq " + label1,
@@ -300,6 +315,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START LessEqualNode */",
                 visit(node.left),
                 visit(node.right),
                 "bleq " + label1,
@@ -319,6 +335,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         String label1 = freshLabel();
         String label2 = freshLabel();
         return nlJoin(
+                "/* START GreaterEqualNode */",
                 visit(node.right),
                 visit(node.left),
                 "sub",
@@ -338,6 +355,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START TimesNode */",
                 visit(node.left),
                 visit(node.right),
                 "mult"
@@ -350,6 +368,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START DivNode */",
                 visit(node.left),
                 visit(node.right),
                 "div"
@@ -362,6 +381,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START PlusNode */",
                 visit(node.left),
                 visit(node.right),
                 "add"
@@ -374,6 +394,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node);
         }
         return nlJoin(
+                "/* START MinusNode */",
                 visit(node.left),
                 visit(node.right),
                 "sub"
@@ -396,6 +417,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         }
         if (node.symbolTableEntry.type instanceof MethodTypeNode) {
             return nlJoin(
+                    "/* START MethodCall " + node.id + "*/",
                     "lfp", // load Control Link (pointer to frame of function "id" caller)
                     argumentsCode, // generate code for argument expressions in reversed order
                     "lfp", getActivationRecordCode, // retrieve address of frame containing "id" declaration
@@ -411,6 +433,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             );
         } else {
             return nlJoin(
+                    "/* START CallNode " + node.id + " */",
                     "lfp", // load Control Link (pointer to frame of function "id" caller)
                     argumentsCode, // generate code for argument expressions in reversed order
                     "lfp", getActivationRecordCode, // retrieve address of frame containing "id" declaration
@@ -441,6 +464,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
         }
         return nlJoin(
+                "/* START ClassCallNode */",
                 "lfp", // load Control Link (pointer to frame of function "id" caller)
                 argumentsCode, // generate code for argument expressions in reversed order
                 "lfp", getActivationRecordCode, // retrieve address of frame containing "id" declaration
@@ -459,19 +483,17 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) {
             printNode(node);
         }
-        node.argumentsList.forEach(this::visit);
+        String argumentsVisit = "";
+        for(var argument : node.argumentsList) {
+            argumentsVisit = nlJoin(
+                argumentsVisit,
+                visit(argument)
+            );
+        }
         String loadArguments = "";
-
         for ( var i = 0; i < node.argumentsList.size(); i++) {
             loadArguments = nlJoin(
                     loadArguments,
-                    "lhp",
-                    "sw",
-                    "lhp",
-                    "push 1",
-                    "add",
-                    "shp",
-                    "push " + (ExecuteVM.MEMSIZE + node.classSymbolTableEntry.offset),
                     "lhp",
                     "sw",
                     "lhp",
@@ -483,8 +505,16 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
 
 
         return nlJoin(
-                "lhp",
-                loadArguments
+            "/* START NewNode */",
+            argumentsVisit,
+            loadArguments,
+            "push " + (ExecuteVM.MEMSIZE + node.classSymbolTableEntry.offset),
+            "lhp",
+            "sw",
+            "lhp",
+            "push 1",
+            "add",
+            "shp"
         );
     }
 
@@ -498,6 +528,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
         }
         return nlJoin(
+                "/* START IdNode */",
                 "lfp",
                 /*
                  * Retrieve address of frame containing "id" declaration by following the static chain (of Access Links)
@@ -514,7 +545,11 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) {
             printNode(node, node.value.toString());
         }
-        return "push " + (node.value ? 1 : 0);
+        return nlJoin(
+            "/* START ProgNode */",
+            "push " + (node.value ? 1 : 0)
+        )
+        ;
     }
 
     @Override
@@ -522,6 +557,10 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         if (print) {
             printNode(node, node.value.toString());
         }
-        return "push " + node.value;
+        return nlJoin(
+            "/* START ProgNode */",
+            "push " + node.value
+        );
+
     }
 }
