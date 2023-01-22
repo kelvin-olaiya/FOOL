@@ -40,6 +40,9 @@ public class TypeRels {
 			} else if (b instanceof EmptyTypeNode) {
 				return a;
 			}
+			if (((RefTypeNode) a).id.equals(((RefTypeNode) b).id)) {
+				return a;
+			}
 			String type = superType.get(((RefTypeNode) a).id);
 			while(type != null && isSubtype(b, new RefTypeNode(type))) {
 				type = superType.get(type);
