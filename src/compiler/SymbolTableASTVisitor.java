@@ -172,6 +172,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             }
         }
         STentry entry = new STentry(0, classType, declarationOffset--);
+        node.type = classType;
         Map<String, STentry> globalScopeTable = symbolTable.get(0);
         if (globalScopeTable.put(node.id, entry) != null) {
             System.out.println("Class id " + node.id + " at line " + node.getLine() + " already declared");
