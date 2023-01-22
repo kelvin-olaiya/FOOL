@@ -125,17 +125,19 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (node.superID != null) {
 			superType.put(node.id, node.superID);
 			var classType = node.type;
-			var superClassType = (ClassTypeNode) node.superClassEntry.type;
-			for (var i = 0; i < superClassType.allFields.size(); i++) {
-				if (!isSubtype(classType.allFields.get(i), superClassType.allFields.get(i))) {
-					// TODO: better exception message
-					throw new TypeException("Wrong field", node.getLine());
+			var parentClassType = (ClassTypeNode) node.superClassEntry.type;
+			for (var field : node.fields) {
+				int position = -field.offset-1;
+				if (position < parentClassType.allFields.size()
+						&& !isSubtype(classType.allFields.get(position), parentClassType.allFields.get(position))) {
+					throw new TypeException("Wrong type for field " + field.id, field.getLine());
 				}
 			}
-			for (var i = 0; i < superClassType.allMethods.size(); i++) {
-				if (!isSubtype(classType.allMethods.get(i), superClassType.allMethods.get(i))) {
-					// TODO: better exception message
-					throw new TypeException("Wrong method", node.getLine());
+			for (var method : node.methods) {
+				int position = method.offset;
+				if (position < parentClassType.allMethods.size()
+						&& !isSubtype(classType.allMethods.get(position), parentClassType.allMethods.get(position))) {
+					throw new TypeException("Wrong type for method " + method.id, method.getLine());
 				}
 			}
 		}
@@ -174,9 +176,11 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		}
 		TypeNode thenBranchType = visit(node.thenBranch);
 		TypeNode elseBranchType = visit(node.elseBranch);
-		if (isSubtype(thenBranchType, elseBranchType)) return elseBranchType;
-		if (isSubtype(elseBranchType, thenBranchType)) return thenBranchType;
-		throw new TypeException("Incompatible types in then-else branches", node.getLine());
+		var lowestCommonAncestor = lowestCommonAncestor(thenBranchType, elseBranchType);
+		if (lowestCommonAncestor == null) {
+			throw new TypeException("Incompatible types in then-else branches", node.getLine());
+		}
+		return lowestCommonAncestor;
 	}
 
 	@Override

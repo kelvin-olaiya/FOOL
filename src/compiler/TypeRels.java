@@ -17,7 +17,7 @@ public class TypeRels {
 			while (directSuperType != null && !directSuperType.equals(((RefTypeNode) b).id)) {
 				directSuperType = superType.get(directSuperType);
 			}
-			return directSuperType != null;
+			return ((RefTypeNode) a).id.equals(((RefTypeNode) b).id) || directSuperType != null;
 		}
 		if (a instanceof ArrowTypeNode && b instanceof ArrowTypeNode) {
 			return isSubtype(((ArrowTypeNode) a).returnType, ((ArrowTypeNode) b).returnType) &&
@@ -32,4 +32,26 @@ public class TypeRels {
 				|| a instanceof EmptyTypeNode;
 	}
 
+	public static TypeNode lowestCommonAncestor(TypeNode a, TypeNode b) {
+		if (a instanceof RefTypeNode && b instanceof RefTypeNode
+				|| a instanceof EmptyTypeNode || b instanceof EmptyTypeNode) {
+			if (a instanceof EmptyTypeNode) {
+				return b;
+			} else if (b instanceof EmptyTypeNode) {
+				return a;
+			}
+			String type = superType.get(((RefTypeNode) a).id);
+			while(type != null && isSubtype(b, new RefTypeNode(type))) {
+				type = superType.get(type);
+			}
+			return type != null ? new RefTypeNode(type) : null;
+		} else if ((a instanceof BoolTypeNode || a instanceof IntTypeNode)
+				&& (b instanceof BoolTypeNode || b instanceof IntTypeNode)) {
+			if (a instanceof IntTypeNode || b instanceof IntTypeNode) {
+				return new IntTypeNode();
+			}
+			return new BoolTypeNode();
+		}
+		return null;
+	}
 }

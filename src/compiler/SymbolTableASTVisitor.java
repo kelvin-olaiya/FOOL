@@ -31,6 +31,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
     private int declarationOffset = -2; // counter for offset of local declarations at current nesting level
     int symbolTableErrors = 0;
     int fieldOffset = -1;
+    Set<String> onClassVisitScope;
 
     SymbolTableASTVisitor() {
     }
@@ -188,6 +189,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         if (node.superID != null) {
             virtualTable.putAll(superClassVirtualTable);
         }
+        onClassVisitScope = new HashSet<>();
         classTable.put(node.id, virtualTable);
         symbolTable.add(virtualTable);
         int previousNestingLevelDeclarationOffset = declarationOffset;
@@ -195,8 +197,13 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         fieldOffset = node.superID == null ?
                 -1 : -((ClassTypeNode) symbolTable.get(0).get(node.superID).type).allFields.size()-1;
         for (var field : node.fields) {
+            if (onClassVisitScope.contains(field.id)) {
+                System.out.println("Cannot override field with id " + field.id + " on line " + field.getLine());
+                symbolTableErrors++;
+            }
+            onClassVisitScope.add(field.id);
             var overriddenFieldEntry = virtualTable.get(field.id);
-            STentry fieldEntry = null;
+            STentry fieldEntry;
             if (overriddenFieldEntry != null && !(overriddenFieldEntry.type instanceof MethodTypeNode)) {
                 fieldEntry = new STentry(nestingLevel, field.getType(), overriddenFieldEntry.offset);
                 virtualTable.put(field.id, fieldEntry);
@@ -210,12 +217,17 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
                     symbolTableErrors++;
                 }
             }
+            field.offset = fieldEntry.offset;
         }
         int currentDecOffset = declarationOffset;
         // method declarationOffset starts from 0
         declarationOffset = node.superID == null ?
                 0 : ((ClassTypeNode) symbolTable.get(0).get(node.superID).type).allMethods.size();
         for (var method : node.methods) {
+            if (onClassVisitScope.contains(method.id)) {
+                System.out.println("Cannot override method with id " + method.id + " on line " + method.getLine());
+                symbolTableErrors++;
+            }
             visit(method);
             classType.allMethods.add(
                     method.offset,
