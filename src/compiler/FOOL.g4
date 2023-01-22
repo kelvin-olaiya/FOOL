@@ -18,12 +18,12 @@ cldec  : CLASS ID (EXTENDS ID)?
               LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR    
               CLPAR
                    methdec*                
-              CRPAR ; 
+              CRPAR #classDec;
          
 methdec : FUN ID COLON type 
               LPAR (ID COLON type (COMMA ID COLON type)* )? RPAR 
                    (LET dec+ IN)? exp 
-              SEMIC ;
+              SEMIC #methodDec;
 
 dec : VAR ID COLON type ASS exp SEMIC #vardec
     | FUN ID COLON type 

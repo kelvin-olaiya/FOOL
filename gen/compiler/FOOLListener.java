@@ -42,25 +42,29 @@ public interface FOOLListener extends ParseTreeListener {
 	 */
 	void exitNoDecProg(FOOLParser.NoDecProgContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FOOLParser#cldec}.
+	 * Enter a parse tree produced by the {@code classDec}
+	 * labeled alternative in {@link FOOLParser#cldec}.
 	 * @param ctx the parse tree
 	 */
-	void enterCldec(FOOLParser.CldecContext ctx);
+	void enterClassDec(FOOLParser.ClassDecContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FOOLParser#cldec}.
+	 * Exit a parse tree produced by the {@code classDec}
+	 * labeled alternative in {@link FOOLParser#cldec}.
 	 * @param ctx the parse tree
 	 */
-	void exitCldec(FOOLParser.CldecContext ctx);
+	void exitClassDec(FOOLParser.ClassDecContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link FOOLParser#methdec}.
+	 * Enter a parse tree produced by the {@code methodDec}
+	 * labeled alternative in {@link FOOLParser#methdec}.
 	 * @param ctx the parse tree
 	 */
-	void enterMethdec(FOOLParser.MethdecContext ctx);
+	void enterMethodDec(FOOLParser.MethodDecContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link FOOLParser#methdec}.
+	 * Exit a parse tree produced by the {@code methodDec}
+	 * labeled alternative in {@link FOOLParser#methdec}.
 	 * @param ctx the parse tree
 	 */
-	void exitMethdec(FOOLParser.MethdecContext ctx);
+	void exitMethodDec(FOOLParser.MethodDecContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code vardec}
 	 * labeled alternative in {@link FOOLParser#dec}.
