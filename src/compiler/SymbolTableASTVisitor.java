@@ -163,8 +163,8 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             if (classTable.containsKey(node.superID)) {
                 STentry superClassEntry = symbolTable.get(0).get(node.superID);
                 classType = new ClassTypeNode(
-                        ((ClassTypeNode) superClassEntry.type).allFields,
-                        ((ClassTypeNode) superClassEntry.type).allMethods
+                    new ArrayList<>(((ClassTypeNode) superClassEntry.type).allFields),
+                    new ArrayList<>(((ClassTypeNode) superClassEntry.type).allMethods)
                 );
                 node.superClassEntry = superClassEntry;
             } else {
@@ -193,7 +193,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         int previousNestingLevelDeclarationOffset = declarationOffset;
         declarationOffset = -2;
         fieldOffset = node.superID == null ?
-                -1 : -((ClassTypeNode) superClassVirtualTable.get(node.superID).type).allFields.size()-1;
+                -1 : -((ClassTypeNode) symbolTable.get(0).get(node.superID).type).allFields.size()-1;
         for (var field : node.fields) {
             var overriddenFieldEntry = virtualTable.get(field.id);
             STentry fieldEntry = null;
@@ -214,7 +214,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         int currentDecOffset = declarationOffset;
         // method declarationOffset starts from 0
         declarationOffset = node.superID == null ?
-                0 : ((ClassTypeNode) superClassVirtualTable.get(node.superID).type).allMethods.size();
+                0 : ((ClassTypeNode) symbolTable.get(0).get(node.superID).type).allMethods.size();
         for (var method : node.methods) {
             visit(method);
             classType.allMethods.add(
@@ -253,6 +253,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             }
         }
         node.offset = entry.offset;
+        currentScopeTable.put(node.id, entry);
         /*
          * Create a new table for the method.
          */

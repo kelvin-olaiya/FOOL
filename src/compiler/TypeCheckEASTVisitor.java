@@ -124,23 +124,23 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		}
 		if (node.superID != null) {
 			superType.put(node.id, node.superID);
+			var classType = node.type;
+			var superClassType = (ClassTypeNode) node.superClassEntry.type;
+			for (var i = 0; i < superClassType.allFields.size(); i++) {
+				if (!isSubtype(classType.allFields.get(i), superClassType.allFields.get(i))) {
+					// TODO: better exception message
+					throw new TypeException("Wrong field", node.getLine());
+				}
+			}
+			for (var i = 0; i < superClassType.allMethods.size(); i++) {
+				if (!isSubtype(classType.allMethods.get(i), superClassType.allMethods.get(i))) {
+					// TODO: better exception message
+					throw new TypeException("Wrong method", node.getLine());
+				}
+			}
 		}
 		for (var method : node.methods) {
 			visit(method);
-		}
-		var classType = node.type;
-		var superClassType = (ClassTypeNode) node.superClassEntry.type;
-		for (var i = 0; i < node.type.allFields.size(); i++) {
-			if (!isSubtype(superClassType.allFields.get(i), classType.allFields.get(i))) {
-				// TODO: better exception message
-				throw new TypeException("Wrong field", node.getLine());
-			}
-		}
-		for (var i = 0; i < node.type.allMethods.size(); i++) {
-			if (!isSubtype(superClassType.allMethods.get(i), classType.allMethods.get(i))) {
-				// TODO: better exception message
-				throw new TypeException("Wrong method", node.getLine());
-			}
 		}
 		return null;
 	}

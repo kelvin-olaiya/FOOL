@@ -75,6 +75,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         return new ProgNode(visit(c.exp()));
     }
 
+    // TODO: set line for fields class and methods
     @Override
     public Node visitClassDec(ClassDecContext c) {
         if (print) {
@@ -82,12 +83,14 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         }
         String classID = c.ID(0).getText();
         String superID = null;
+        List<FieldNode> fields = new ArrayList<>();
+
         if (c.EXTENDS() != null) {
             superID = c.ID(1).getText();
         }
-        List<FieldNode> fields = new ArrayList<>();
-        IntStream.range(1, c.ID().size()).forEach(i -> {
-            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i - 1))));
+        int extendingPad = c.EXTENDS() != null ? 1 : 0;
+        IntStream.range(1 + extendingPad, c.ID().size()).forEach(i -> {
+            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i - (1 + extendingPad)))));
         });
         List<MethodNode> methods = new ArrayList<>();
         for (var method : c.methdec()) {

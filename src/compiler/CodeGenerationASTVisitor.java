@@ -13,6 +13,8 @@ import static compiler.lib.FOOLlib.nlJoin;
 
 public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
+    List<List<String>> dispatchTables = new ArrayList<>();
+
     CodeGenerationASTVisitor() {
     }
 
@@ -130,6 +132,11 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node, node.id);
         }
         List<String> dispatchTable = new ArrayList<>();
+        dispatchTables.add(dispatchTable);
+        if (node.superID != null) {
+            var superClassDispatchTable = dispatchTables.get(-node.superClassEntry.offset-2);
+            dispatchTable.addAll(superClassDispatchTable);
+        }
         node.methods.forEach(methodNode -> {
             visit(methodNode);
             dispatchTable.add(methodNode.offset, methodNode.label);
