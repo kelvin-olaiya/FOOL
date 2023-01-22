@@ -96,11 +96,13 @@ public class AST {
     public static class ClassNode extends DecNode {
 
         final String id;
+        final String superID;
         final List<FieldNode> fields;
         final List<MethodNode> methods;
 
-        public ClassNode(String id, List<FieldNode> fields, List<MethodNode> methods) {
+        public ClassNode(String id, String superID, List<FieldNode> fields, List<MethodNode> methods) {
             this.id = id;
+            this.superID = superID;
             this.fields = Collections.unmodifiableList(fields);
             this.methods = Collections.unmodifiableList(methods);
         }
