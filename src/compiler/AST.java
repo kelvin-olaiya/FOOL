@@ -99,6 +99,7 @@ public class AST {
         final String superID;
         final List<FieldNode> fields;
         final List<MethodNode> methods;
+        STentry superClassEntry;
 
         public ClassNode(String id, String superID, List<FieldNode> fields, List<MethodNode> methods) {
             this.id = id;

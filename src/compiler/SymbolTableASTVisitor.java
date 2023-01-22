@@ -160,14 +160,17 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         }
         var classType = new ClassTypeNode(new ArrayList<>(), new ArrayList<>());
         if (node.superID != null) {
-            STentry superClassEntry = symbolTable.get(0).get(node.superID);
-            classType = new ClassTypeNode(
-                    ((ClassTypeNode) superClassEntry.type).allFields,
-                    ((ClassTypeNode) superClassEntry.type).allMethods
-            );
+            if (classTable.containsKey(node.superID)) {
+                STentry superClassEntry = symbolTable.get(0).get(node.superID);
+                classType = new ClassTypeNode(
+                        ((ClassTypeNode) superClassEntry.type).allFields,
+                        ((ClassTypeNode) superClassEntry.type).allMethods
+                );
+                node.superClassEntry = superClassEntry;
+            } else {
+                System.out.println("Extending class id " + node.superID + " at line " + node.getLine() + " is not declared");
+            }
         }
-
-
         STentry entry = new STentry(0, classType, declarationOffset--);
         Map<String, STentry> globalScopeTable = symbolTable.get(0);
         if (globalScopeTable.put(node.id, entry) != null) {
@@ -180,41 +183,45 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
          */
         nestingLevel++;
         Map<String, STentry> virtualTable = new HashMap<>();
+        var superClassVirtualTable = classTable.get(node.superID);
         if (node.superID != null) {
-            var superClassVirtualTable = classTable.get(node.superID);
             virtualTable.putAll(superClassVirtualTable);
         }
         classTable.put(node.id, virtualTable);
         symbolTable.add(virtualTable);
         int previousNestingLevelDeclarationOffset = declarationOffset;
         declarationOffset = -2;
-        fieldOffset = -1;
+        fieldOffset = node.superID == null ?
+                -1 : -((ClassTypeNode) superClassVirtualTable.get(node.superID).type).allFields.size()-1;
         for (var field : node.fields) {
             var overriddenFieldEntry = virtualTable.get(field.id);
-
-            if (overriddenFieldEntry != null) {
-                virtualTable.put(field.id, new STentry(nestingLevel, field.getType(), overriddenFieldEntry.offset));
-                classType.allFields.set(-overriddenFieldEntry.offset - 1, overriddenFieldEntry.type);
+            STentry fieldEntry = null;
+            if (overriddenFieldEntry != null && !(overriddenFieldEntry.type instanceof MethodTypeNode)) {
+                fieldEntry = new STentry(nestingLevel, field.getType(), overriddenFieldEntry.offset);
+                virtualTable.put(field.id, fieldEntry);
+                classType.allFields.set(-fieldEntry.offset - 1, fieldEntry.type);
             } else {
-                STentry fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
+                fieldEntry = new STentry(nestingLevel, field.getType(), fieldOffset--);
                 virtualTable.put(field.id, fieldEntry);
                 classType.allFields.add(-fieldEntry.offset - 1, fieldEntry.type);
+                if (overriddenFieldEntry != null) {
+                    System.out.println("Cannot override field id " + field.id + " with a method");
+                    symbolTableErrors++;
+                }
             }
-
-
         }
-        // TODO: is this useful?
         int currentDecOffset = declarationOffset;
-        declarationOffset = 0; // TODO: why should we do this?
+        // method declarationOffset starts from 0
+        declarationOffset = node.superID == null ?
+                0 : ((ClassTypeNode) superClassVirtualTable.get(node.superID).type).allMethods.size();
         for (var method : node.methods) {
             visit(method);
-
             classType.allMethods.add(
                     method.offset,
                     ((MethodTypeNode) virtualTable.get(method.id).type).functionalType
             );
         }
-        declarationOffset = currentDecOffset;
+        declarationOffset = currentDecOffset; // restores the previous declaration offset
         symbolTable.remove(nestingLevel--);
         declarationOffset = previousNestingLevelDeclarationOffset;
         return null;
@@ -228,17 +235,23 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         for (ParNode parameter : node.parametersList) {
             parametersTypes.add(parameter.getType());
         }
-        final TypeNode methodType = new MethodTypeNode(new ArrowTypeNode(parametersTypes, node.returnType));
-        STentry entry = new STentry(nestingLevel, methodType, declarationOffset++);
-        node.offset = entry.offset;
         /*
          * Insert ID into the symbolTable.
          */
 
-        if (currentScopeTable.put(node.id, entry) != null) {
-            System.out.println("Method id " + node.id + " at line " + node.getLine() + " already declared");
-            symbolTableErrors++;
+        var overriddenMethodEntry = currentScopeTable.get(node.id);
+        final TypeNode methodType = new MethodTypeNode(new ArrowTypeNode(parametersTypes, node.returnType));
+        STentry entry = null;
+        if (overriddenMethodEntry != null && overriddenMethodEntry.type instanceof MethodTypeNode) {
+            entry = new STentry(nestingLevel, methodType, overriddenMethodEntry.offset);
+        } else {
+            entry = new STentry(nestingLevel, methodType, declarationOffset++);
+            if (overriddenMethodEntry != null) {
+                System.out.println("Cannot override method id " + node.id + " with a field");
+                symbolTableErrors++;
+            }
         }
+        node.offset = entry.offset;
         /*
          * Create a new table for the method.
          */
