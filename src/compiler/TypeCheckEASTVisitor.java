@@ -38,14 +38,17 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	
 	@Override
 	public TypeNode visitNode(ProgLetInNode node) throws TypeException {
-		if (print) printNode(node);
-		for (Node declaration : node.declarationList)
+		if (print) {
+			printNode(node);
+		}
+		for (Node declaration : node.declarationList) {
 			try {
 				visit(declaration);
 			} catch (IncomplException e) {
 			} catch (TypeException e) {
 				System.out.println("Type checking error in a declaration: " + e.text);
 			}
+		}
 		return visit(node.expression);
 	}
 
@@ -62,13 +65,14 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) {
 			printNode(node, node.id);
 		}
-		for (Node declaration : node.declarationsList)
+		for (Node declaration : node.declarationsList) {
 			try {
 				visit(declaration);
-			} catch (IncomplException e) { 
+			} catch (IncomplException e) {
 			} catch (TypeException e) {
 				System.out.println("Type checking error in a declaration: " + e.text);
 			}
+		}
 		if (!isSubtype(visit(node.expression), checkVisit(node.returnType))) {
 			throw new TypeException("Wrong return type for function " + node.id,node.getLine());
 		}
@@ -122,6 +126,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) {
 			printNode(node);
 		}
+		for (var method : node.methods) {
+			visit(method);
+		}
 		if (node.superID != null) {
 			superType.put(node.id, node.superID);
 			var classType = node.type;
@@ -140,9 +147,6 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 					throw new TypeException("Wrong type for method " + method.id, method.getLine());
 				}
 			}
-		}
-		for (var method : node.methods) {
-			visit(method);
 		}
 		return null;
 	}
@@ -214,9 +218,9 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		if (print) {
 			printNode(node);
 		}
-		TypeNode l = visit(node.left);
-		TypeNode r = visit(node.right);
-		if (!(isSubtype(l, r) || isSubtype(r, l))) {
+		TypeNode left = visit(node.left);
+		TypeNode right = visit(node.right);
+		if (!(isSubtype(left, right) || isSubtype(right, left))) {
 			throw new TypeException("Incompatible types in greater equal",node.getLine());
 		}
 		return new BoolTypeNode();
@@ -364,6 +368,10 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		TypeNode idType = visit(node.symbolTableEntry);
 		if (idType instanceof ArrowTypeNode) {
 			throw new TypeException("Wrong usage of function identifier " + node.id,node.getLine());
+		} else if (idType instanceof MethodTypeNode) {
+			throw new TypeException("Wrong usage of method identifier " + node.id,node.getLine());
+		} else if (idType instanceof  ClassTypeNode) {
+			throw new TypeException("Wrong usage of class identifier " + node.id,node.getLine());
 		}
 		return idType;
 	}
