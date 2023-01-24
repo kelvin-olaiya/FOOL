@@ -481,6 +481,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         if (print) {
             printNode(node);
         }
+        node.nestingLevel = nestingLevel;
         STentry entry = stLookup(node.objectId);
         if (entry == null) {
             System.out.println("Object id " + node.objectId + " at line " + node.getLine() + " not declared");

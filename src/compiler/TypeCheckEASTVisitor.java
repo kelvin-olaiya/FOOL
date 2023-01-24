@@ -105,7 +105,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(MethodNode node) throws TypeException {
 		if (print) {
-			printNode(node);
+			printNode(node, node.id);
 		}
 		for (Node declaration : node.declarationsList) {
 			try {
@@ -124,7 +124,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ClassNode node) throws TypeException {
 		if (print) {
-			printNode(node);
+			printNode(node, node.id);
 		}
 		for (var method : node.methods) {
 			visit(method);
@@ -340,7 +340,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 	@Override
 	public TypeNode visitNode(ClassCallNode node) throws TypeException {
 		if (print) {
-			printNode(node);
+			printNode(node, node.objectId+"."+node.methodId);
 		}
 		TypeNode methodType = visit(node.methodEntry);
 		if (!(methodType instanceof MethodTypeNode)) {
