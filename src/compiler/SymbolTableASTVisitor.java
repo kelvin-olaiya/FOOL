@@ -416,7 +416,6 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         return null;
     }
 
-
     @Override
     public Void visitNode(TimesNode node) {
         if (print) {
