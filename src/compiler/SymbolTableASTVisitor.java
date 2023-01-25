@@ -30,7 +30,6 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
     private int nestingLevel = 0; // current nesting level
     private int declarationOffset = -2; // counter for offset of local declarations at current nesting level
     int symbolTableErrors = 0;
-    int fieldOffset = -1;
     Set<String> onClassVisitScope;
 
     SymbolTableASTVisitor() {
@@ -196,7 +195,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         /*
          * Setting the fieldOffset for the extending class
          */
-        fieldOffset = -1;
+        int fieldOffset = -1;
         if (node.superID != null) {
             fieldOffset = -((ClassTypeNode) symbolTable.get(0).get(node.superID).type).allFields.size()-1;
         }
