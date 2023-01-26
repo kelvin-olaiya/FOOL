@@ -13,7 +13,6 @@ public class ExecuteVM {
 
     public static final int MEMSIZE = 10000;
     public static final int CODESIZE = 10000;
-
     private int[] code;
     private int[] memory;
 
@@ -24,12 +23,14 @@ public class ExecuteVM {
     private int hp = 0;
     private int ra;
     private int fp = MEMSIZE;
-
+    private final List<CodeLine> codeLines = new ArrayList<>();
     private final JFrame frame;
     private final JPanel mainPanel;
     private final JPanel buttonPanel;
-    private final JList<Object> asmList;
+    private final JList<CodeLine> asmList;
     private final JList<String> stackList, heapList;
+    private final JButton backStep;
+    private final JButton reset;
     private final JButton nextStep;
     private final JButton play;
     private final JPanel registerPanel;
@@ -41,11 +42,15 @@ public class ExecuteVM {
     private final int codeLineCount;
     private String keyboardCommand = "";
 
-    private int[] sourceMap;
     private List<String> source;
+    private int[] sourceMap;
+
+
+    private int debugLineCode = 0;
+
 
     public ExecuteVM(int[] code, int[] sourceMap, List<String> source) {
-        boolean printArgumentLineNumber=false;
+        boolean printArgumentLineNumber = false;
         this.code = code;
         this.sourceMap = sourceMap;
         this.source = source;
@@ -58,10 +63,17 @@ public class ExecuteVM {
         this.buttonPanel.setLayout(new BoxLayout(this.buttonPanel, BoxLayout.Y_AXIS));
         this.play = new JButton("PLAY");
         this.play.addActionListener(e -> this.playButtonHandler());
+        this.reset = new JButton("RESET");
+        this.reset.addActionListener(e -> this.resetButtonHandler());
+        this.backStep = new JButton("BACK STEP");
+        this.backStep.addActionListener(e -> this.backStepButtonHandler());
         this.nextStep = new JButton("STEP");
         this.nextStep.addActionListener(e -> this.stepButtonHandler());
         this.buttonPanel.add(this.play);
+        this.buttonPanel.add(this.reset);
+        this.buttonPanel.add(this.backStep);
         this.buttonPanel.add(this.nextStep);
+
 
         this.registerPanel = new JPanel();
         this.tmLabel = new JLabel();
@@ -85,57 +97,40 @@ public class ExecuteVM {
         this.registerPanel.add(this.hpLabel);
 
         this.mainPanel.setLayout(new BorderLayout());
-        this.asmList = new JList<Object>();
-//		final List<String> disassembly = new ArrayList<>();
-//		int i;
-//		for (i = 0; i < this.code.length && this.code[i] != 0; i++) {
-//			disassembly.add(String.format("%5d: %s", i, SVMParser.tokenNames[this.code[i]].replace("'", "")));
-//			if (Arrays.asList(SVMParser.PUSH, SVMParser.BRANCH, SVMParser.BRANCHEQ, SVMParser.BRANCHLESSEQ)
-//					.contains(this.code[i])) {
-//				i++;
-//				disassembly.add(String.format("%5d: %d", i, this.code[i]));
-//			}
-//		}
-//		this.codeLineCount = i;
-//		this.asmList.setListData(new Vector<>(disassembly));
-
-
-//        for (int i = 0; i < this.source.size(); i++) {
-//            this.source.set(i, String.format("%5d: %s", i, this.source.get(i)));
-//        }
+        this.asmList = new JList<>();
 
         int realIp = 0;
-        var commandLines = new ArrayList<>();
         for (var line : this.source) {
 
             // line blank should not be printed
             if (line.isBlank()) {
-                commandLines.add("\n");
+                codeLines.add(CodeLine.simpleLine("\n"));
                 continue;
             }
 
             // label for function definition is not ad instruction in code[]
             // => setting same address of first function instruction
             if (line.contains(":")) {
-            //    commandLines.add(String.format("%5d: %s", realIp, line));
-                commandLines.add("       "+line);
+                //    commandLines.add(String.format("%5d: %s", realIp, line));
+                codeLines.add(CodeLine.simpleLine("       " + line));
                 continue;
             }
 
             var macro = line.split(" ");
             if (macro.length > 1) {
                 if (printArgumentLineNumber) {
-                    commandLines.add(String.format("%5d: %s   | %5d: %s", realIp++, macro[0], realIp++, macro[1]));
+                    codeLines.add(CodeLine.lineWithBreakpoint(String.format("%5d: %s   | %5d: %s", realIp++, macro[0], realIp++, macro[1])));
                 } else {
-                    commandLines.add(String.format("%5d: %s", realIp++, line));
+                    codeLines.add(CodeLine.lineWithBreakpoint(String.format("%5d: %s", realIp++, line)));
                     realIp++;
                 }
             } else {
-                commandLines.add(String.format("%5d: %s", realIp++, line));
+                codeLines.add(CodeLine.lineWithBreakpoint(String.format("%5d: %s", realIp++, line)));
             }
         }
 
-        this.asmList.setListData(new Vector<>(commandLines));
+        this.asmList.setListData(new Vector<>(codeLines));
+        this.asmList.setCellRenderer(new CodeLineCellRenderer());
         this.codeLineCount = this.source.size();
 
 
@@ -146,6 +141,31 @@ public class ExecuteVM {
         for (MouseMotionListener m : this.asmList.getMouseMotionListeners()) {
             this.asmList.removeMouseMotionListener(m);
         }
+
+        this.asmList.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                codeLines.get(asmList.locationToIndex(e.getPoint())).switchBreakpoint();
+                asmList.repaint();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+
         this.asmScroll = new JScrollPane(this.asmList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.mainPanel.add(this.asmScroll, BorderLayout.EAST);
@@ -183,10 +203,14 @@ public class ExecuteVM {
                 ExecuteVM.this.keyboardCommand += e.getKeyChar();
                 ExecuteVM.this.checkKeyboardCommand();
             }
+
             @Override
-            public void keyReleased(KeyEvent e) {}
+            public void keyReleased(KeyEvent e) {
+            }
+
             @Override
-            public void keyPressed(KeyEvent e) {}
+            public void keyPressed(KeyEvent e) {
+            }
         });
 
         this.update();
@@ -206,6 +230,50 @@ public class ExecuteVM {
     }
 
 
+    public ExecuteVM(int[] code, int[] sourceMap, List<String> source, int debugLineCode) {
+        this(code, sourceMap, source);
+        this.debugLineCode = debugLineCode;
+    }
+
+    private void reset(){
+        this.memory = new int[MEMSIZE];
+        this.tm = 0;
+        this.ra = 0;
+        this.fp = MEMSIZE;
+        this.ip = 0;
+        this.sp = MEMSIZE;
+        this.hp = 0;
+        this.nextStep.setEnabled(true);
+        this.play.setEnabled(true);
+    }
+
+    private void resetButtonHandler() {
+        this.debugLineCode = 0;
+        this.reset();
+        this.update();
+    }
+
+    private void backStepButtonHandler() {
+
+        if (this.debugLineCode > 0) {
+            this.debugLineCode--;
+            this.reset();
+
+            int tempBreakpoint = 0;
+            while (this.step()) {
+                tempBreakpoint++;
+                if (lineHasBreakpoint() || tempBreakpoint == this.debugLineCode) {
+                    this.update();
+                    return;
+                }
+            }
+            this.nextStep.setEnabled(false);
+            this.play.setEnabled(false);
+            ip--;
+            this.update();
+        }
+    }
+
 
     private void checkKeyboardCommand() {
         if (this.keyboardCommand.endsWith(" ")) {
@@ -221,7 +289,6 @@ public class ExecuteVM {
         }
         this.keyboardCommand = "";
     }
-
 
 
     private void setMem() {
@@ -253,11 +320,23 @@ public class ExecuteVM {
     }
 
     private void playButtonHandler() {
-        while (this.step());
+        while (this.step()) {
+            debugLineCode++;
+            if (lineHasBreakpoint()) {
+                this.update();
+                return;
+            }
+        }
         this.nextStep.setEnabled(false);
         this.play.setEnabled(false);
         ip--;
         this.update();
+    }
+
+    private boolean lineHasBreakpoint() {
+        return this.codeLines.get(this.sourceMap[this.ip])
+                .hasBreakpoint()
+                .orElse(false);
     }
 
     private void stepButtonHandler() {
@@ -266,6 +345,7 @@ public class ExecuteVM {
             this.nextStep.setEnabled(false);
             this.play.setEnabled(false);
         } else {
+            this.debugLineCode++;
             this.update();
         }
     }
@@ -384,4 +464,101 @@ public class ExecuteVM {
         return code[ip++];
     }
 
+}
+
+/**
+ * A code line with instruction and breakpoint if possible.
+ */
+interface CodeLine {
+
+    Optional<Boolean> hasBreakpoint();
+
+    void switchBreakpoint();
+
+    String getInstruction();
+
+    static CodeLine simpleLine(String instruction) {
+        return new CodeLine() {
+            @Override
+            public Optional<Boolean> hasBreakpoint() {
+                return Optional.empty();
+            }
+
+            @Override
+            public void switchBreakpoint() {
+            }
+
+            @Override
+            public String getInstruction() {
+                return instruction;
+            }
+        };
+    }
+
+    static CodeLine lineWithBreakpoint(String instruction) {
+        return new CodeLine() {
+            private boolean breakpoint;
+
+            @Override
+            public Optional<Boolean> hasBreakpoint() {
+                return Optional.of(this.breakpoint);
+            }
+
+            @Override
+            public void switchBreakpoint() {
+                this.breakpoint = !this.breakpoint;
+            }
+
+            @Override
+            public String getInstruction() {
+                return instruction;
+            }
+        };
+    }
+}
+
+/**
+ * Component rendering for CodeLine in JList.
+ */
+class CodeLineCellRenderer extends JPanel implements ListCellRenderer<CodeLine> {
+    JLabel label;
+    JCheckBox checkBox;
+
+    public CodeLineCellRenderer() {
+        setLayout(new BorderLayout());
+        checkBox = new JCheckBox();
+        label = new JLabel();
+        add(checkBox, BorderLayout.WEST);
+        add(label, BorderLayout.CENTER);
+        checkBox.setEnabled(true);
+    }
+
+    @Override
+    public Component getListCellRendererComponent(
+            JList<? extends CodeLine> list,
+            CodeLine value,
+            int index, boolean isSelected, boolean cellHasFocus) {
+
+        label.setText(value.getInstruction());
+
+        if (value.hasBreakpoint().isEmpty()) {
+            checkBox.setVisible(false);
+        } else {
+            checkBox.setVisible(true);
+            checkBox.setSelected(value.hasBreakpoint().get());
+        }
+
+        if (isSelected) {
+            setBackground(list.getSelectionBackground());
+            setForeground(list.getSelectionForeground());
+            label.setBackground(list.getSelectionBackground());
+            label.setForeground(list.getSelectionForeground());
+        } else {
+            setBackground(list.getBackground());
+            setForeground(list.getForeground());
+            label.setBackground(list.getBackground());
+            label.setForeground(list.getForeground());
+        }
+        return this;
+    }
 }
