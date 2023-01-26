@@ -230,11 +230,6 @@ public class ExecuteVM {
     }
 
 
-    public ExecuteVM(int[] code, int[] sourceMap, List<String> source, int debugLineCode) {
-        this(code, sourceMap, source);
-        this.debugLineCode = debugLineCode;
-    }
-
     private void reset(){
         this.memory = new int[MEMSIZE];
         this.tm = 0;
@@ -245,25 +240,22 @@ public class ExecuteVM {
         this.hp = 0;
         this.nextStep.setEnabled(true);
         this.play.setEnabled(true);
-        this.outputText.setText("");
     }
 
     private void resetButtonHandler() {
         this.debugLineCode = 0;
+        this.outputText.setText("");
         this.reset();
         this.update();
     }
 
     private void backStepButtonHandler() {
-
+        this.reset();
         if (this.debugLineCode < 2) {
             this.debugLineCode = 0;
-            this.reset();
             this.update();
         }else{
             this.debugLineCode--;
-            this.reset();
-
             int tempBreakpoint = 0;
             while (this.step()) {
                 tempBreakpoint++;
