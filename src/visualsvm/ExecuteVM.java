@@ -245,6 +245,7 @@ public class ExecuteVM {
         this.hp = 0;
         this.nextStep.setEnabled(true);
         this.play.setEnabled(true);
+        this.outputText.setText("");
     }
 
     private void resetButtonHandler() {
@@ -255,7 +256,11 @@ public class ExecuteVM {
 
     private void backStepButtonHandler() {
 
-        if (this.debugLineCode > 0) {
+        if (this.debugLineCode < 2) {
+            this.debugLineCode = 0;
+            this.reset();
+            this.update();
+        }else{
             this.debugLineCode--;
             this.reset();
 
