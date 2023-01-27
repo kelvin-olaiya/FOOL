@@ -259,7 +259,7 @@ public class ExecuteVM {
             int tempBreakpoint = 0;
             while (this.step()) {
                 tempBreakpoint++;
-                if (lineHasBreakpoint() || tempBreakpoint == this.debugLineCode) {
+                if (tempBreakpoint == this.debugLineCode) {
                     this.update();
                     return;
                 }
