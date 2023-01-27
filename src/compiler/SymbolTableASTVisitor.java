@@ -29,7 +29,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
     Map<String, Map<String, STentry>> classTable = new HashMap<>();
     private int nestingLevel = 0; // current nesting level
     private int declarationOffset = -2; // counter for offset of local declarations at current nesting level
-    int symbolTableErrors = 0;
+    int stErrors = 0;
     Set<String> onClassVisitScope;
 
     SymbolTableASTVisitor() {
@@ -93,7 +93,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         final STentry entry = new STentry(nestingLevel, functionType, declarationOffset--);
         if (scopeTable.put(node.id, entry) != null) {
             System.out.println("Fun id " + node.id + " at line " + node.getLine() + " already declared");
-            symbolTableErrors++;
+            stErrors++;
         }
         /*
          * Create a new hashmap for the new scope in symbolTable.
@@ -114,7 +114,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             final STentry parameterEntry = new STentry(nestingLevel, parameter.getType(), parameterOffset++);
             if (functionScopeTable.put(parameter.id, parameterEntry) != null) {
                 System.out.println("Par id " + parameter.id + " at line " + node.getLine() + " already declared");
-                symbolTableErrors++;
+                stErrors++;
             }
         }
         /*
@@ -148,7 +148,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         STentry entry = new STentry(nestingLevel, node.getType(), declarationOffset--);
         if (currentScopeTable.put(node.id, entry) != null) {
             System.out.println("Var id " + node.id + " at line " + node.getLine() + " already declared");
-            symbolTableErrors++;
+            stErrors++;
         }
         visit(node.expression);
         return null;
@@ -177,7 +177,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         Map<String, STentry> globalScopeTable = symbolTable.get(0);
         if (globalScopeTable.put(node.id, entry) != null) {
             System.out.println("Class id " + node.id + " at line " + node.getLine() + " already declared");
-            symbolTableErrors++;
+            stErrors++;
         }
         /*
          * Add a the scope table for the id of the class.
@@ -207,7 +207,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
                 System.out.println(
                     "Field with id " + field.id + " on line " + field.getLine() + " was already declared"
                 );
-                symbolTableErrors++;
+                stErrors++;
             }
             onClassVisitScope.add(field.id);
             var overriddenFieldEntry = virtualTable.get(field.id);
@@ -220,7 +220,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
                 classType.allFields.add(-fieldEntry.offset - 1, fieldEntry.type);
                 if (overriddenFieldEntry != null) {
                     System.out.println("Cannot override field id " + field.id + " with a method");
-                    symbolTableErrors++;
+                    stErrors++;
                 }
             }
             /*
@@ -241,7 +241,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
                 System.out.println(
                     "Method with id " + method.id + " on line " + method.getLine() + " was already declared"
                 );
-                symbolTableErrors++;
+                stErrors++;
             }
             visit(method);
             classType.allMethods.add(
@@ -275,7 +275,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             entry = new STentry(nestingLevel, methodType, declarationOffset++);
             if (overriddenMethodEntry != null) {
                 System.out.println("Cannot override method id " + node.id + " with a field");
-                symbolTableErrors++;
+                stErrors++;
             }
         }
         node.offset = entry.offset;
@@ -293,7 +293,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
             final STentry parameterEntry = new STentry(nestingLevel, parameter.getType(), parameterOffset++);
             if (methodScopeTable.put(parameter.id, parameterEntry) != null) {
                 System.out.println("Par id " + parameter.id + " at line " + node.getLine() + " already declared");
-                symbolTableErrors++;
+                stErrors++;
             }
         }
         for (Node declaration : node.declarationsList) {
@@ -315,7 +315,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         }
         if (!classTable.containsKey(node.id)) {
             System.out.println("Class id " + node.id + " was not declared");
-            symbolTableErrors++;
+            stErrors++;
         }
         node.classSymbolTableEntry = symbolTable.get(0).get(node.id);
         for (var argument : node.argumentsList) {
@@ -331,7 +331,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         }
         if (!classTable.containsKey(node.id)) {
             System.out.println("Class with id " + node.id + " on line " + node.getLine() + " was not declared");
-            symbolTableErrors++;
+            stErrors++;
         }
         return null;
     }
@@ -463,7 +463,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         STentry entry = stLookup(node.id);
         if (entry == null) {
             System.out.println("Fun or Method with id " + node.id + " at line " + node.getLine() + " not declared");
-            symbolTableErrors++;
+            stErrors++;
         } else {
             node.symbolTableEntry = entry;
             node.nestingLevel = nestingLevel;
@@ -482,7 +482,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         STentry entry = stLookup(node.objectId);
         if (entry == null) {
             System.out.println("Object id " + node.objectId + " at line " + node.getLine() + " not declared");
-            symbolTableErrors++;
+            stErrors++;
         } else if (entry.type instanceof RefTypeNode) {
             node.symbolTableEntry = entry;
             node.nestingLevel = nestingLevel;
@@ -491,7 +491,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
                 System.out.println(
                         "Object id " + node.objectId + " at line " + node.getLine() + " has no method " + node.methodId
                 );
-                symbolTableErrors++;
+                stErrors++;
             }
         }
         for (Node argument : node.argumentsList) {
@@ -508,7 +508,7 @@ public class SymbolTableASTVisitor extends BaseASTVisitor<Void, VoidException> {
         STentry entry = stLookup(node.id);
         if (entry == null) {
             System.out.println("Var or Par id " + node.id + " at line " + node.getLine() + " not declared");
-            symbolTableErrors++;
+            stErrors++;
         } else {
             node.symbolTableEntry = entry;
             node.nestingLevel = nestingLevel;

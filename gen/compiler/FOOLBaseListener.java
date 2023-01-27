@@ -52,25 +52,25 @@ public class FOOLBaseListener implements FOOLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterClassDec(FOOLParser.ClassDecContext ctx) { }
+	@Override public void enterCldec(FOOLParser.CldecContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitClassDec(FOOLParser.ClassDecContext ctx) { }
+	@Override public void exitCldec(FOOLParser.CldecContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMethodDec(FOOLParser.MethodDecContext ctx) { }
+	@Override public void enterMethdec(FOOLParser.MethdecContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMethodDec(FOOLParser.MethodDecContext ctx) { }
+	@Override public void exitMethdec(FOOLParser.MethdecContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

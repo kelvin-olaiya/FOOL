@@ -102,7 +102,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             printNode(node, node.id);
         }
         String getActivationRecordCode = null;
-        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nestingLevel; i++) {
+        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nl; i++) {
             getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
         }
         return nlJoin(
@@ -128,7 +128,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
         for (int i = node.argumentsList.size() - 1; i >= 0; i--) {
             argumentsCode = nlJoin(argumentsCode, visit(node.argumentsList.get(i)));
         }
-        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nestingLevel; i++) {
+        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nl; i++) {
             getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
         }
         String commonCode = nlJoin(
@@ -443,7 +443,7 @@ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidExcepti
             argumentsCode = nlJoin(argumentsCode, visit(node.argumentsList.get(i)));
         }
         String getActivationRecordCode = null;
-        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nestingLevel; i++) {
+        for (int i = 0; i < node.nestingLevel - node.symbolTableEntry.nl; i++) {
             getActivationRecordCode = nlJoin(getActivationRecordCode, "lw");
         }
         return nlJoin(
