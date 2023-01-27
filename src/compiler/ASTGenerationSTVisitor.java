@@ -75,8 +75,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         return new ProgNode(visit(c.exp()));
     }
 
-    @Override
-    public Node visitClassDec(ClassDecContext c) {
+    public Node visitCldec(CldecContext c) {
         if (print) {
             printVarAndProdName(c);
         }
@@ -102,8 +101,7 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         return node;
     }
 
-    @Override
-    public Node visitMethodDec(MethodDecContext c) {
+    public Node visitMethdec(MethdecContext c) {
         if (print) {
             printVarAndProdName(c);
         }
