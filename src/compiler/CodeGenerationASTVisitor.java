@@ -11,7 +11,7 @@ import java.util.List;
 import static compiler.lib.FOOLlib.*;
 import static compiler.lib.FOOLlib.nlJoin;
 
-public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
+ public class CodeGenerationASTVisitor extends BaseASTVisitor<String, VoidException> {
 
     List<List<String>> dispatchTables = new ArrayList<>();
 

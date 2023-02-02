@@ -3,11 +3,12 @@ let
 
         fun getBool:bool (c:bool)
             let
-            var r:bool = a && b && c;
+            var r:bool =true;
             in r;
+
     }
 
-    var bl:A = new A(true,true);
+
 in
-    print(bl.getBool(true));
+    print(2);
 

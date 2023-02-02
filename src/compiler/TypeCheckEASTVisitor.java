@@ -182,7 +182,7 @@ public class TypeCheckEASTVisitor extends BaseEASTVisitor<TypeNode,TypeException
 		TypeNode elseBranchType = visit(node.elseBranch);
 		var lowestCommonAncestor = lowestCommonAncestor(thenBranchType, elseBranchType);
 		if (lowestCommonAncestor == null) {
-			throw new TypeException("Incompatible types in then-else branches", node.getLine());
+			throw new TypeException("Incompatible types in then-else bra nches", node.getLine());
 		}
 		return lowestCommonAncestor;
 	}

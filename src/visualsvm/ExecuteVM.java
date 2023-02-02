@@ -30,6 +30,7 @@ public class ExecuteVM {
     private final JList<CodeLine> asmList;
     private final JList<String> stackList, heapList;
     private final JButton backStep;
+    private final JButton backToBreakPoint;
     private final JButton reset;
     private final JButton nextStep;
     private final JButton play;
@@ -65,12 +66,15 @@ public class ExecuteVM {
         this.play.addActionListener(e -> this.playButtonHandler());
         this.reset = new JButton("RESET");
         this.reset.addActionListener(e -> this.resetButtonHandler());
+        this.backToBreakPoint = new JButton("BACK TO BREAK POINT");
+        this.backToBreakPoint.addActionListener(e -> this.backToBreakPointButtonHandler());
         this.backStep = new JButton("BACK STEP");
         this.backStep.addActionListener(e -> this.backStepButtonHandler());
         this.nextStep = new JButton("STEP");
         this.nextStep.addActionListener(e -> this.stepButtonHandler());
         this.buttonPanel.add(this.play);
         this.buttonPanel.add(this.reset);
+        this.buttonPanel.add(this.backToBreakPoint);
         this.buttonPanel.add(this.backStep);
         this.buttonPanel.add(this.nextStep);
 
@@ -230,7 +234,7 @@ public class ExecuteVM {
     }
 
 
-    private void reset(){
+    private void reset() {
         this.memory = new int[MEMSIZE];
         this.tm = 0;
         this.ra = 0;
@@ -249,12 +253,32 @@ public class ExecuteVM {
         this.update();
     }
 
+    private void backToBreakPointButtonHandler() {
+        this.reset();
+        int nearlestBreakpoint = 0;
+        int tempBreakpoint = 0;
+        while (this.step()) {
+            tempBreakpoint++;
+            if (lineHasBreakpoint()) {
+                nearlestBreakpoint = tempBreakpoint;
+            }
+
+            if (tempBreakpoint + 1  == this.debugLineCode) {
+                break;
+            }
+        }
+        this.debugLineCode = nearlestBreakpoint+1;
+        this.backStepButtonHandler();
+
+    }
+
+
     private void backStepButtonHandler() {
         this.reset();
         if (this.debugLineCode < 2) {
             this.debugLineCode = 0;
             this.update();
-        }else{
+        } else {
             this.debugLineCode--;
             int tempBreakpoint = 0;
             while (this.step()) {
