@@ -75,25 +75,33 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         return new ProgNode(visit(c.exp()));
     }
 
-    @Override
-    public Node visitClassDec(ClassDecContext c) {
+    public Node visitCldec(CldecContext c) {
         if (print) {
             printVarAndProdName(c);
         }
         String classID = c.ID(0).getText();
+        String superID = null;
         List<FieldNode> fields = new ArrayList<>();
-        IntStream.range(1, c.ID().size()).forEach(i -> {
-            fields.add(new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i-1))));
+
+        if (c.EXTENDS() != null) {
+            superID = c.ID(1).getText();
+        }
+        int extendingPad = c.EXTENDS() != null ? 1 : 0;
+        IntStream.range(1 + extendingPad, c.ID().size()).forEach(i -> {
+            var field = new FieldNode(c.ID(i).getText(), (TypeNode) visit(c.type(i - (1 + extendingPad))));
+            field.setLine(c.ID(i).getSymbol().getLine());
+            fields.add(field);
         });
         List<MethodNode> methods = new ArrayList<>();
         for (var method : c.methdec()) {
             methods.add((MethodNode) visit(method));
         }
-        return new ClassNode(classID, fields, methods);
+        var node = new ClassNode(classID, superID, fields, methods);
+        node.setLine(c.ID(0).getSymbol().getLine());
+        return node;
     }
 
-    @Override
-    public Node visitMethodDec(MethodDecContext c) {
+    public Node visitMethdec(MethdecContext c) {
         if (print) {
             printVarAndProdName(c);
         }
@@ -104,10 +112,12 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
             parameters.add(new ParNode(c.ID(i).getText(), (TypeNode) visit(c.type(i))));
         });
         List<DecNode> declarations = new ArrayList<>();
-        for(var declaration : c.dec()) {
+        for (var declaration : c.dec()) {
             declarations.add((DecNode) visit(declaration));
         }
-        return new MethodNode(methodId, returnType, parameters, declarations, visit(c.exp()));
+        var node = new MethodNode(methodId, returnType, parameters, declarations, visit(c.exp()));
+        node.setLine(c.ID(0).getSymbol().getLine());
+        return node;
     }
 
     @Override
@@ -119,7 +129,9 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         for (var i = 0; i < c.exp().size(); i++) {
             argumentsList.add(visit(c.exp(i)));
         }
-        return new NewNode(c.ID().getText(), argumentsList);
+        var node = new NewNode(c.ID().getText(), argumentsList);
+        node.setLine(c.ID().getSymbol().getLine());
+        return node;
     }
 
     @Override
@@ -252,7 +264,9 @@ public class ASTGenerationSTVisitor extends FOOLBaseVisitor<Node> {
         if (print) {
             printVarAndProdName(c);
         }
-        return new RefTypeNode(c.ID().getText());
+        var node = new RefTypeNode(c.ID().getText());
+        node.setLine(c.ID().getSymbol().getLine());
+        return node;
     }
 
     @Override

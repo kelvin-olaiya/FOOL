@@ -5,13 +5,13 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import compiler.lib.*;
 import compiler.exc.*;
-import visualsvm.*;
-import java.nio.file.*;
+import svm.*;
 
 public class Test {
     public static void main(String[] args) throws Exception {
+   			
+    	String fileName = "bankloan.fool";
 
-    	String fileName = "quicksort.fool";
     	CharStream chars = CharStreams.fromFileName(fileName);
     	FOOLLexer lexer = new FOOLLexer(chars);
     	CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -30,7 +30,7 @@ public class Test {
     	System.out.println("Enriching AST via symbol table.");
     	SymbolTableASTVisitor symtableVisitor = new SymbolTableASTVisitor();
     	symtableVisitor.visit(ast);
-    	System.out.println("You had "+symtableVisitor.symbolTableErrors +" symbol table errors.\n");
+    	System.out.println("You had "+symtableVisitor.stErrors+" symbol table errors.\n");
 
     	System.out.println("Visualizing Enriched AST.");
     	new PrintEASTVisitor().visit(ast);
@@ -42,23 +42,23 @@ public class Test {
     		TypeNode mainType = typeCheckVisitor.visit(ast);
     		System.out.print("Type of main program expression is: ");
     		new PrintEASTVisitor().visit(mainType);
-    	} catch (IncomplException e) {
+    	} catch (IncomplException e) {    		
     		System.out.println("Could not determine main program expression type due to errors detected before type checking.");
     	} catch (TypeException e) {
-    		System.out.println("Type checking error in main program expression: "+e.text);
-    	}
+    		System.out.println("Type checking error in main program expression: "+e.text); 
+    	}       	
     	System.out.println("You had "+FOOLlib.typeErrors+" type checking errors.\n");
 
-    	int frontEndErrors = lexer.lexicalErrors+parser.getNumberOfSyntaxErrors()+symtableVisitor.symbolTableErrors +FOOLlib.typeErrors;
+    	int frontEndErrors = lexer.lexicalErrors+parser.getNumberOfSyntaxErrors()+symtableVisitor.stErrors+FOOLlib.typeErrors;
 		System.out.println("You had a total of "+frontEndErrors+" front-end errors.\n");
-
-		if ( frontEndErrors > 0) System.exit(1);
+		
+		if ( frontEndErrors > 0) System.exit(1);   
 
     	System.out.println("Generating code.");
-    	String code = new CodeGenerationASTVisitor().visit(ast);
-    	BufferedWriter out = new BufferedWriter(new FileWriter(fileName+".asm"));
+    	String code = new CodeGenerationASTVisitor().visit(ast);        
+    	BufferedWriter out = new BufferedWriter(new FileWriter(fileName+".asm")); 
     	out.write(code);
-    	out.close();
+    	out.close(); 
     	System.out.println("");
 
     	System.out.println("Assembling generated code.");
@@ -74,11 +74,7 @@ public class Test {
     	if (lexerASM.lexicalErrors+parserASM.getNumberOfSyntaxErrors()>0) System.exit(1);
 
     	System.out.println("Running generated code via Stack Virtual Machine.");
-		ExecuteVM vm = new ExecuteVM(
-			parserASM.code,
-			parserASM.sourceMap,
-			Files.readAllLines(Paths.get(fileName+".asm"))
-		);
+    	ExecuteVM vm = new ExecuteVM(parserASM.code);
     	vm.cpu();
 
     }
